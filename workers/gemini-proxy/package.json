@@ -1,0 +1,14 @@
+{
+  "name": "nexuslife-gemini-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker — proxies Gemini API calls so the key stays server-side. OAuth-gated to one email.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.95.0"
+  }
+}

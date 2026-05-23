@@ -1,0 +1,13 @@
+name = "nexuslife-gemini-proxy"
+main = "src/index.js"
+compatibility_date = "2025-12-01"
+
+# KV for caching tokeninfo lookups (5-min TTL on accept, 60s on reject)
+# Create with: npx wrangler kv:namespace create TOKEN_CACHE
+[[kv_namespaces]]
+binding = "TOKEN_CACHE"
+id = "REPLACE_WITH_KV_ID"
+
+# Secrets — set via `wrangler secret put`, NEVER in this file:
+#   GEMINI_API_KEY   — your AI Studio key
+#   ALLOWED_EMAIL    — your Gmail (the only account the proxy will serve)

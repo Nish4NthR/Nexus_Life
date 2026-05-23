@@ -1,25 +1,33 @@
 /**
- * AI client for NexusLife — uses Google Gemini (free tier).
+ * AI client for NexusLife — calls the gemini-proxy Cloudflare Worker so the
+ * Gemini API key stays server-side. The proxy verifies the caller's Google
+ * OAuth access token (same one used for Drive) belongs to the allowed email
+ * before forwarding to Gemini — safe to ship in a public bundle.
  *
- * Direct browser → Gemini REST call (acceptable for a single-user localhost app).
- * The API key is bundled into the client JS via Vite env vars — see project memory.
- *
- * Function names still start with `callClaude` for backwards compatibility with
- * all the feature helpers and external imports — only the implementation switched.
+ * Function names still start with `callClaude` for backwards compatibility
+ * with all the feature helpers and external imports — only the implementation
+ * underneath changed.
  *
  * All helpers return either a string/object or `null` on failure. They never
  * throw — UI code can safely render fallbacks.
  */
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+import { useDriveAuthStore } from '../store/useDriveAuthStore.js';
+
+const PROXY_URL = import.meta.env.VITE_GEMINI_PROXY_URL;
 const DEFAULT_MODEL =
   import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash-lite';
 const HEAVY_MODEL = 'gemini-2.5-flash';
 
-const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
-
 export function isAIAvailable() {
-  return Boolean(API_KEY) && API_KEY !== 'placeholder';
+  return Boolean(PROXY_URL) && PROXY_URL.startsWith('http');
+}
+
+function currentAccessToken() {
+  const t = useDriveAuthStore.getState().token;
+  if (!t || !t.accessToken) return null;
+  if (Date.now() >= t.expiresAt) return null;
+  return t.accessToken;
 }
 
 /**
@@ -69,6 +77,11 @@ async function geminiGenerate({
   responseSchema,
 }) {
   if (!isAIAvailable()) return null;
+  const token = currentAccessToken();
+  if (!token) {
+    console.warn('[gemini] no valid Google OAuth token — sign in to Drive first');
+    return null;
+  }
 
   const body = {
     contents: [
@@ -93,10 +106,13 @@ async function geminiGenerate({
 
   try {
     const res = await fetch(
-      `${BASE_URL}/models/${resolveModel(model)}:generateContent?key=${API_KEY}`,
+      `${PROXY_URL}/v1beta/models/${resolveModel(model)}:generateContent`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(body),
       }
     );
