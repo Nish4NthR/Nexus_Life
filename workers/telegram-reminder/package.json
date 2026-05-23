@@ -1,0 +1,14 @@
+{
+  "name": "nexuslife-telegram-reminder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker — daily Telegram reminders for NexusLife with inline-button action queue.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.95.0"
+  }
+}

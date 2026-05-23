@@ -1,0 +1,22 @@
+name = "nexuslife-telegram-reminder"
+main = "src/index.js"
+compatibility_date = "2025-12-01"
+
+# Cron triggers — UTC. Morning 8:00 IST = 02:30 UTC; Evening 21:00 IST = 15:30 UTC.
+# Tweak to whatever times you want; remember Cloudflare uses UTC.
+[triggers]
+crons = ["30 2 * * *", "30 15 * * *"]
+
+# KV namespace for the action queue (button taps land here, frontend polls).
+# Create with: npx wrangler kv:namespace create ACTION_QUEUE
+# Then paste the returned `id` below.
+[[kv_namespaces]]
+binding = "ACTION_QUEUE"
+id = "REPLACE_WITH_KV_ID"
+
+# Secrets — set via `wrangler secret put`, NOT here. NEVER paste real values
+# into this file (it's committed to source control):
+#   TELEGRAM_BOT_TOKEN     — from @BotFather
+#   TELEGRAM_CHAT_ID       — your numeric chat ID (call /whoami to find it)
+#   SHARED_SECRET          — long random hex string (openssl rand -hex 32)
+#   WEBHOOK_PATH_TOKEN     — random path token (openssl rand -hex 16)

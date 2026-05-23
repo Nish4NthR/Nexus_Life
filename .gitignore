@@ -1,0 +1,20 @@
+node_modules
+.npm-cache
+dist
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.log
+.vite
+.vscode
+.idea
+
+# Per-agent and per-IDE state — never commit
+.claude
+
+# Cloud Function / Worker caches & local-only secrets
+functions/*/node_modules
+workers/*/node_modules
+workers/*/.wrangler
+workers/*/.dev.vars

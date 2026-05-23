@@ -1,0 +1,12 @@
+name = "nexuslife-upi-receiver"
+main = "src/index.js"
+compatibility_date = "2025-12-01"
+
+# KV namespace binding — bind to your KV namespace after creating it
+# Replace `id` with the value from `wrangler kv:namespace create SMS_QUEUE`
+[[kv_namespaces]]
+binding = "SMS_QUEUE"
+id = "b66a62eaa4ec427ea5061ca829419600"
+
+# Secrets (set via `wrangler secret put SHARED_SECRET`, NOT here):
+#   SHARED_SECRET — must match VITE_UPI_API_SECRET in the frontend .env

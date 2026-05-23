@@ -1,0 +1,14 @@
+{
+  "name": "nexuslife-upi-receiver",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker — tiny UPI SMS queue for NexusLife. IFTTT posts here, NexusLife polls.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.95.0"
+  }
+}

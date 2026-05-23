@@ -1,0 +1,13 @@
+{
+  "name": "nexuslife-sms-receiver",
+  "version": "1.0.0",
+  "description": "Google Cloud Function that appends incoming UPI SMS to sms-queue.json in GCS",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.14.0"
+  }
+}
