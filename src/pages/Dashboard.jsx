@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ResponsiveContainer, LineChart, Line, Tooltip } from 'recharts';
 import GlassCard from '../components/ui/GlassCard.jsx';
-import MoodPicker from '../components/journal/MoodPicker.jsx';
+
 import { useAuthStore } from '../store/useAuthStore.js';
 import { useHabitsStore } from '../store/useHabitsStore.js';
 import { useExpensesStore, formatINR } from '../store/useExpensesStore.js';
@@ -39,7 +39,6 @@ export default function Dashboard() {
   const badHabits = useBadHabitsStore((s) => s.badHabits);
 
   const moods = useJournalStore((s) => s.moods);
-  const setMood = useJournalStore((s) => s.setMood);
 
   useEffect(() => {
     loadHabits();
@@ -264,54 +263,43 @@ export default function Dashboard() {
           )}
         </GlassCard>
 
-        {/* Mood + sparkline stacked */}
-        <div className="space-y-6">
-          <GlassCard hover={false}>
-            <h2 className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
-              Mood Check-in
-            </h2>
-            <div className="mt-3">
-              <MoodPicker value={todayMood} onChange={(m) => setMood(m)} />
+        {/* Spending sparkline */}
+        <GlassCard hover={false}>
+          <h2 className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
+            Spending (7d)
+          </h2>
+          {sparkline.every((p) => p.value === 0) ? (
+            <div className="mt-4 text-sm text-slate-500">
+              No expenses in the last 7 days.
             </div>
-          </GlassCard>
-
-          <GlassCard hover={false}>
-            <h2 className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
-              Spending (7d)
-            </h2>
-            {sparkline.every((p) => p.value === 0) ? (
-              <div className="mt-4 text-sm text-slate-500">
-                No expenses in the last 7 days.
-              </div>
-            ) : (
-              <div className="mt-3 h-24">
-                <ResponsiveContainer>
-                  <LineChart data={sparkline}>
-                    <Tooltip
-                      contentStyle={{
-                        background: '#000',
-                        border: '1px solid rgba(57,255,20,0.45)',
-                        borderRadius: 8,
-                        color: '#e7ffe7',
-                        fontSize: 11,
-                        boxShadow: '0 0 10px rgba(57,255,20,0.20)',
-                      }}
-                      formatter={(v) => formatINR(v)}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#39ff14"
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4, fill: '#39ff14' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </GlassCard>
-        </div>
+          ) : (
+            <div className="mt-3 h-24">
+              <ResponsiveContainer>
+                <LineChart data={sparkline}>
+                  <Tooltip
+                    contentStyle={{
+                      background: '#000',
+                      border: '1px solid rgba(57,255,20,0.45)',
+                      borderRadius: 8,
+                      color: '#e7ffe7',
+                      fontSize: 11,
+                      boxShadow: '0 0 10px rgba(57,255,20,0.20)',
+                    }}
+                    formatter={(v) => formatINR(v)}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#39ff14"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4, fill: '#39ff14' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </GlassCard>
       </div>
 
       {/* Active goal progress bars */}
