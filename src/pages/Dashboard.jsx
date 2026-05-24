@@ -122,9 +122,11 @@ export default function Dashboard() {
       <motion.h1
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="font-display text-3xl text-slate-100 sm:text-4xl"
+        className="font-mono text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl"
       >
-        {greeting}, <span className="text-nebula-cyan">{username}</span> 🚀
+        <span className="text-nebula-violet">{greeting.toLowerCase().replace('good ', '')}</span>
+        <span className="text-[color:var(--text-faint)]">, </span>
+        <span className="text-nebula-cyan">{username}</span>
       </motion.h1>
 
       {/* AI quote */}
@@ -167,42 +169,42 @@ export default function Dashboard() {
           title="Habits"
           value={`${habitsDone}/${activeHabits.length}`}
           sub={topStreak ? `🔥 ${topStreak}d streak` : 'no streak'}
-          accent="#58a6ff"
+          accent="#39ff14"
           to="/habits"
         />
         <Module
           title="Goals"
           value={activeGoals.length}
           sub={`${goals.filter((g) => g.status === 'completed').length} done`}
-          accent="#79c0ff"
+          accent="#00cc44"
           to="/goals"
         />
         <Module
           title="Expenses"
           value={formatINR(monthExpenses)}
           sub="this month"
-          accent="#F59E0B"
+          accent="#d29922"
           to="/expenses"
         />
         <Module
           title="Learning"
           value={`${learnStreak}d`}
           sub={`${learningItems.length} tracked`}
-          accent="#238636"
+          accent="#5eead4"
           to="/learning"
         />
         <Module
           title="Bad Habits"
           value={`${bestQuit}d`}
           sub={`${badHabits.length} tracking`}
-          accent="#EF4444"
+          accent="#f85149"
           to="/bad-habits"
         />
         <Module
           title="Journal"
           value={todayMood ? MOODS.find((m) => m.id === todayMood)?.emoji || '—' : '—'}
           sub="today's mood"
-          accent="#94A3B8"
+          accent="#8bc98b"
           to="/journal"
         />
       </div>
@@ -287,21 +289,22 @@ export default function Dashboard() {
                   <LineChart data={sparkline}>
                     <Tooltip
                       contentStyle={{
-                        background: 'rgba(13,17,23,0.9)',
-                        border: '1px solid rgba(56,139,253,0.4)',
+                        background: '#000',
+                        border: '1px solid rgba(57,255,20,0.45)',
                         borderRadius: 8,
-                        color: '#fff',
+                        color: '#e7ffe7',
                         fontSize: 11,
+                        boxShadow: '0 0 10px rgba(57,255,20,0.20)',
                       }}
                       formatter={(v) => formatINR(v)}
                     />
                     <Line
                       type="monotone"
                       dataKey="value"
-                      stroke="#79c0ff"
+                      stroke="#39ff14"
                       strokeWidth={2}
                       dot={false}
-                      activeDot={{ r: 4 }}
+                      activeDot={{ r: 4, fill: '#39ff14' }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -337,8 +340,8 @@ export default function Dashboard() {
                       className="h-full rounded-full"
                       style={{
                         width: `${p.percent}%`,
-                        background: g.color || '#58a6ff',
-                        boxShadow: `0 0 10px ${g.color || '#58a6ff'}aa`,
+                        background: g.color || '#39ff14',
+                        boxShadow: `0 0 10px ${g.color || '#39ff14'}aa`,
                       }}
                     />
                   </div>
@@ -355,14 +358,21 @@ export default function Dashboard() {
 function Module({ title, value, sub, accent, to }) {
   return (
     <Link to={to} className="block">
-      <GlassCard className="min-h-[120px] !p-4 transition hover:shadow-glow">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-slate-400">
+      <GlassCard className="min-h-[124px] !p-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500">
           {title}
         </div>
-        <div className="mt-2 font-display text-2xl" style={{ color: accent }}>
+        <div
+          className="mt-3 font-mono text-2xl font-semibold tabular-nums"
+          style={{ color: accent, textShadow: `0 0 10px ${accent}55` }}
+        >
           {value}
         </div>
-        {sub && <div className="mt-1 text-[10px] uppercase tracking-widest text-slate-500">{sub}</div>}
+        {sub && (
+          <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-slate-600">
+            {sub}
+          </div>
+        )}
       </GlassCard>
     </Link>
   );

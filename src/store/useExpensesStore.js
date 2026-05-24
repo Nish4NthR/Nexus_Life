@@ -8,13 +8,13 @@ import { todayKey } from '../utils/dateHelpers.js';
  */
 
 export const EXPENSE_CATEGORIES = [
-  { id: 'food',           label: 'Food',          icon: '🍽',  color: '#F59E0B' },
-  { id: 'transport',      label: 'Transport',     icon: '🚗',  color: '#79c0ff' },
-  { id: 'shopping',       label: 'Shopping',      icon: '🛍',  color: '#58a6ff' },
-  { id: 'entertainment',  label: 'Entertainment', icon: '🎬',  color: '#EF4444' },
-  { id: 'health',         label: 'Health',        icon: '💊',  color: '#238636' },
-  { id: 'education',      label: 'Education',     icon: '📚',  color: '#3B82F6' },
-  { id: 'others',         label: 'Others',        icon: '✦',   color: '#94A3B8' },
+  { id: 'food',           label: 'Food',          icon: '🍽',  color: '#d29922' },
+  { id: 'transport',      label: 'Transport',     icon: '🚗',  color: '#00cc44' },
+  { id: 'shopping',       label: 'Shopping',      icon: '🛍',  color: '#39ff14' },
+  { id: 'entertainment',  label: 'Entertainment', icon: '🎬',  color: '#f85149' },
+  { id: 'health',         label: 'Health',        icon: '💊',  color: '#2b6e2b' },
+  { id: 'education',      label: 'Education',     icon: '📚',  color: '#5eead4' },
+  { id: 'others',         label: 'Others',        icon: '✦',   color: '#8bc98b' },
 ];
 
 export function categoryMeta(id) {

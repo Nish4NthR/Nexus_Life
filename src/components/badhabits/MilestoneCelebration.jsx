@@ -39,7 +39,7 @@ export default function MilestoneCelebration({ open, days, onClose }) {
                 transition={{ duration: 1.6, ease: 'easeOut' }}
                 className="absolute h-2 w-2 rounded-full"
                 style={{
-                  background: i % 3 === 0 ? '#79c0ff' : i % 3 === 1 ? '#58a6ff' : '#d29922',
+                  background: i % 3 === 0 ? '#39ff14' : i % 3 === 1 ? '#00cc44' : '#d29922',
                   boxShadow: '0 0 22px currentColor',
                 }}
               />

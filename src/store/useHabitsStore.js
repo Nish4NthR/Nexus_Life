@@ -7,7 +7,7 @@ import { computeStreak, computeLongestStreak } from '../utils/streakLogic.js';
  * Habit shape:
  *   {
  *     id, name, category, frequency: 'daily'|'weekly',
- *     time: '07:00' | null, icon: '🧘', color: '#58a6ff',
+ *     time: '07:00' | null, icon: '🧘', color: '#39ff14',
  *     createdAt, archived: false, xpPerCompletion: 10
  *   }
  *
@@ -16,11 +16,11 @@ import { computeStreak, computeLongestStreak } from '../utils/streakLogic.js';
  */
 
 const CATEGORY_COLORS = {
-  health: '#238636',
-  learning: '#79c0ff',
-  fitness: '#F59E0B',
-  mindfulness: '#58a6ff',
-  productivity: '#EF4444',
+  health: '#39ff14',
+  learning: '#00cc44',
+  fitness: '#d29922',
+  mindfulness: '#5eead4',
+  productivity: '#f85149',
 };
 
 const uid = () =>
@@ -66,7 +66,7 @@ export const useHabitsStore = create((set, get) => ({
       frequency: input.frequency || 'daily',
       time: input.time || null,
       icon: input.icon || '✦',
-      color: input.color || CATEGORY_COLORS[input.category] || '#58a6ff',
+      color: input.color || CATEGORY_COLORS[input.category] || '#39ff14',
       createdAt: now,
       archived: false,
       xpPerCompletion: input.xpPerCompletion || 10,
@@ -177,9 +177,9 @@ async function persistLogs(logs, set) {
 }
 
 export const HABIT_CATEGORIES = [
-  { id: 'health', label: 'Health', color: CATEGORY_COLORS.health },
-  { id: 'learning', label: 'Learning', color: CATEGORY_COLORS.learning },
-  { id: 'fitness', label: 'Fitness', color: CATEGORY_COLORS.fitness },
-  { id: 'mindfulness', label: 'Mindfulness', color: CATEGORY_COLORS.mindfulness },
-  { id: 'productivity', label: 'Productivity', color: CATEGORY_COLORS.productivity },
+  { id: 'health',       label: 'Health',       icon: '💚', color: CATEGORY_COLORS.health },
+  { id: 'learning',     label: 'Learning',     icon: '📚', color: CATEGORY_COLORS.learning },
+  { id: 'fitness',      label: 'Fitness',      icon: '💪', color: CATEGORY_COLORS.fitness },
+  { id: 'mindfulness',  label: 'Mindfulness',  icon: '🧘', color: CATEGORY_COLORS.mindfulness },
+  { id: 'productivity', label: 'Productivity', icon: '⚡', color: CATEGORY_COLORS.productivity },
 ];

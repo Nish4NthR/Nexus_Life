@@ -11,12 +11,12 @@ export default function OrbitSpinner({ size = 48, className = '' }) {
       <div
         className="absolute inset-0 rounded-full border-2 border-transparent animate-orbit"
         style={{
-          borderTopColor: '#58a6ff',
-          borderRightColor: '#79c0ff',
+          borderTopColor: '#39ff14',
+          borderRightColor: '#00cc44',
         }}
       />
       <div
-        className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-nebula-cyan shadow-glow-cyan animate-orbit"
+        className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-nebula-violet shadow-glow animate-orbit"
         style={{ width: 6, height: 6 }}
       />
     </div>

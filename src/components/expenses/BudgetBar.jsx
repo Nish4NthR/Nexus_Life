@@ -50,10 +50,10 @@ export default function BudgetBar({ expenses, budgets, onEditBudget }) {
         const pct = limit > 0 ? Math.min(100, (spent / limit) * 100) : 0;
         const over = limit > 0 && spent > limit;
         const warnColor =
-          !limit ? '#94a3b8' :
-          pct > 90 ? '#EF4444' :
-          pct > 60 ? '#F59E0B' :
-          '#238636';
+          !limit ? '#8bc98b' :
+          pct > 90 ? '#f85149' :
+          pct > 60 ? '#d29922' :
+          '#39ff14';
 
         return (
           <button

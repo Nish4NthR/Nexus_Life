@@ -2,8 +2,7 @@ import { useThemeStore } from '../../store/useThemeStore.js';
 
 /**
  * Sun / moon button. Flips app-wide theme via useThemeStore.
- * Same visual footprint as the surrounding nav buttons so it slots into
- * the Navbar cleanly.
+ * Sits cleanly in the Navbar alongside the logout button.
  */
 export default function ThemeToggle({ className = '' }) {
   const theme = useThemeStore((s) => s.theme);
@@ -16,7 +15,7 @@ export default function ThemeToggle({ className = '' }) {
       onClick={toggle}
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-      className={`rounded-xl border border-white/10 bg-black/30 px-3 py-1.5 text-sm text-slate-300 transition hover:border-nebula-violet/60 hover:text-nebula-violet ${className}`}
+      className={`rounded-md border border-nebula-violet/15 bg-black px-3 py-1.5 font-mono text-sm text-[color:var(--text-muted)] transition hover:border-nebula-violet/60 hover:text-nebula-violet hover:shadow-glow ${className}`}
     >
       <span aria-hidden="true">{isDark ? '☀' : '☾'}</span>
     </button>

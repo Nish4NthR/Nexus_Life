@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
  * Built-in study timer with a pulsing nebula ring.
  * Calls onStop(minutes) when the user stops the timer with > 0 elapsed.
  */
-export default function StudyTimer({ onStop, color = '#79c0ff' }) {
+export default function StudyTimer({ onStop, color = '#39ff14' }) {
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0); // seconds
   const startRef = useRef(null);

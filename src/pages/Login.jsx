@@ -76,8 +76,8 @@ export default function Login() {
     <div className="relative flex min-h-screen items-center justify-center px-4">
       <StarField density={180} />
 
-      <div className="pointer-events-none absolute -top-32 left-1/3 h-96 w-96 rounded-full bg-nebula-violet/30 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 h-96 w-96 rounded-full bg-nebula-cyan/20 blur-3xl" />
+      {/* Single soft neon ambient — subtle, not loud */}
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-nebula-violet/10 blur-3xl" />
 
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.98 }}
@@ -87,15 +87,15 @@ export default function Login() {
       >
         <div className="mb-8 text-center">
           <motion.h1
-            initial={{ letterSpacing: '0.4em', opacity: 0 }}
-            animate={{ letterSpacing: '0.18em', opacity: 1 }}
-            transition={{ duration: 0.9, ease: 'easeOut' }}
-            className="font-display text-4xl font-bold text-glow"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="font-mono text-3xl font-bold text-nebula-violet text-glow"
           >
-            NEXUSLIFE
+            <span className="text-nebula-cyan">&gt;</span> nexus<span className="text-nebula-cyan">_</span>life
           </motion.h1>
-          <p className="mt-2 text-sm uppercase tracking-[0.35em] text-slate-400">
-            Mission Control
+          <p className="mt-3 font-mono text-xs uppercase tracking-[0.35em] text-[color:var(--text-muted)]">
+            mission control
           </p>
         </div>
 
@@ -164,15 +164,14 @@ function CredsCard({
         <button
           type="submit"
           disabled={submitting || !username || !password}
-          className="group relative w-full overflow-hidden rounded-xl border border-nebula-violet/50 bg-nebula-violet/15 px-5 py-3 font-display text-sm uppercase tracking-[0.3em] text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-nebula-violet/30 hover:shadow-glow"
+          className="group relative w-full overflow-hidden rounded-lg border border-nebula-violet/50 bg-black px-5 py-3 font-mono text-sm uppercase tracking-[0.25em] text-nebula-violet transition hover:scale-[1.02] hover:border-nebula-violet hover:bg-nebula-violet/10 hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
         >
-          <span className="relative z-10">{submitting ? 'Engaging…' : 'Initiate'}</span>
-          <span className="absolute inset-0 -z-0 bg-gradient-to-r from-nebula-violet/0 via-nebula-cyan/30 to-nebula-violet/0 opacity-0 transition-opacity group-hover:opacity-100" />
+          {submitting ? 'engaging…' : '> initiate'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-xs text-slate-500">
-        Credentials validated locally against <code>.env</code>.
+      <p className="mt-6 text-center font-mono text-[11px] text-[color:var(--text-faint)]">
+        credentials validated locally against <code>.env</code>
       </p>
     </GlassCard>
   );
@@ -181,17 +180,17 @@ function CredsCard({
 function DriveCard({ signingIn, error, ready, onConnect }) {
   return (
     <GlassCard strong hover={false} className="p-8 text-center">
-      <div className="font-display text-sm uppercase tracking-[0.35em] text-slate-400">
-        Step 2 of 2
+      <div className="font-mono text-[11px] uppercase tracking-[0.35em] text-[color:var(--text-muted)]">
+        step 2 of 2
       </div>
-      <h2 className="mt-3 font-display text-2xl text-glow">Connect Drive</h2>
-      <p className="mt-3 text-sm text-slate-400">
-        NexusLife stores your data inside a single <code>NexusLife</code> folder in your
-        Google Drive. Nothing else in your Drive is touched.
+      <h2 className="mt-3 font-mono text-2xl text-nebula-violet text-glow">connect drive</h2>
+      <p className="mt-3 text-sm text-[color:var(--text-muted)]">
+        NexusLife stores your data inside a single <code className="font-mono text-nebula-cyan">NexusLife</code> folder
+        in your Google Drive. Nothing else in your Drive is touched.
       </p>
 
       {error && (
-        <div className="mt-4 rounded-xl border border-nebula-red/40 bg-nebula-red/10 px-3 py-2 text-xs text-nebula-red">
+        <div className="mt-4 rounded-lg border border-nebula-red/40 bg-nebula-red/10 px-3 py-2 font-mono text-xs text-nebula-red">
           {error}
         </div>
       )}
@@ -199,23 +198,23 @@ function DriveCard({ signingIn, error, ready, onConnect }) {
       <button
         onClick={onConnect}
         disabled={!ready || signingIn}
-        className="mt-6 inline-flex items-center justify-center gap-3 rounded-xl border border-nebula-cyan/60 bg-nebula-cyan/15 px-6 py-3 font-display text-sm uppercase tracking-[0.25em] text-white shadow-glow-cyan transition disabled:opacity-50 hover:bg-nebula-cyan/25"
+        className="mt-6 inline-flex items-center justify-center gap-3 rounded-lg border border-nebula-violet/50 bg-black px-6 py-3 font-mono text-sm uppercase tracking-[0.25em] text-nebula-violet transition hover:scale-[1.02] hover:border-nebula-violet hover:bg-nebula-violet/10 hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
       >
         {signingIn ? (
           <>
             <OrbitSpinner size={18} />
-            <span>Connecting…</span>
+            <span>connecting…</span>
           </>
         ) : (
           <>
             <GoogleMark />
-            <span>Sign in with Google</span>
+            <span>sign in with Google</span>
           </>
         )}
       </button>
 
-      <p className="mt-6 text-center text-[11px] text-slate-500">
-        Scope: <code>drive.file</code> — app-created files only.
+      <p className="mt-6 text-center font-mono text-[11px] text-[color:var(--text-faint)]">
+        scope: <code>drive.file</code> — app-created files only
       </p>
     </GlassCard>
   );
@@ -247,7 +246,7 @@ function GoogleMark() {
 function Field({ label, type, value, onChange, disabled, autoComplete }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-medium uppercase tracking-[0.25em] text-slate-400">
+      <span className="mb-2 block font-mono text-[11px] uppercase tracking-[0.25em] text-[color:var(--text-muted)]">
         {label}
       </span>
       <input
@@ -256,7 +255,7 @@ function Field({ label, type, value, onChange, disabled, autoComplete }) {
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         autoComplete={autoComplete}
-        className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-nebula-cyan/70 focus:bg-black/40 focus:shadow-glow-cyan disabled:opacity-50"
+        className="w-full rounded-lg border border-nebula-violet/15 bg-black px-4 py-3 font-mono text-sm text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-nebula-violet/80 focus:shadow-glow disabled:opacity-50"
       />
     </label>
   );

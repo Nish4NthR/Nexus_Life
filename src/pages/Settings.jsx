@@ -128,8 +128,8 @@ export default function Settings() {
             />
             <Row
               label="Theme"
-              value="Deep Emerald · Dark Slate"
-              hint="Edit tailwind.config.js to change palette."
+              value="Monkeytype · Neon Green"
+              hint="Edit src/styles/global.css to change palette."
             />
           </div>
         </GlassCard>

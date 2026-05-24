@@ -18,9 +18,9 @@ import { computeStreak } from '../utils/streakLogic.js';
  */
 
 export const LEARNING_TYPES = [
-  { id: 'course', label: 'Course',  icon: '📺', color: '#79c0ff' },
-  { id: 'book',   label: 'Book',    icon: '📚', color: '#F59E0B' },
-  { id: 'coding', label: 'Coding',  icon: '💻', color: '#58a6ff' },
+  { id: 'course', label: 'Course',  icon: '📺', color: '#00cc44' },
+  { id: 'book',   label: 'Book',    icon: '📚', color: '#d29922' },
+  { id: 'coding', label: 'Coding',  icon: '💻', color: '#39ff14' },
 ];
 
 export function learningTypeMeta(id) {

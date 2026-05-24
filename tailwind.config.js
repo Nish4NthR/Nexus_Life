@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 const SYSTEM_STACK = [
+  'Inter',
   '-apple-system',
   'BlinkMacSystemFont',
   '"Segoe UI"',
@@ -8,15 +9,26 @@ const SYSTEM_STACK = [
   'sans-serif',
 ];
 
+const MONO_STACK = [
+  '"JetBrains Mono"',
+  'ui-monospace',
+  'SFMono-Regular',
+  '"SF Mono"',
+  'Menlo',
+  'Consolas',
+  'monospace',
+];
+
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       fontFamily: {
-        // Both `display` and `sans` resolve to the OS system stack so the app
-        // reads like github.com. Class names like `font-display` still work.
+        // `font-display` and `font-sans` resolve to Inter + system stack.
+        // `font-mono` provides JetBrains Mono for numbers/stats/counters.
         display: SYSTEM_STACK,
         sans: SYSTEM_STACK,
+        mono: MONO_STACK,
       },
       colors: {
         // Class names kept (nebula-*, space-*) so existing JSX continues to work.
@@ -35,13 +47,14 @@ export default {
           900: 'rgb(var(--space-900) / <alpha-value>)',
           800: 'rgb(var(--space-800) / <alpha-value>)',
           700: 'rgb(var(--space-700) / <alpha-value>)',
+          600: 'rgb(var(--space-600) / <alpha-value>)',
         },
       },
       boxShadow: {
-        // Flat 1px borders, no glow. Class names preserved for compatibility.
-        glow: '0 0 0 1px var(--border-subtle)',
-        'glow-cyan': '0 0 0 1px var(--border-subtle)',
-        'glow-red': '0 0 0 1px var(--nebula-red)',
+        // Neon glow utilities. Class names preserved.
+        glow:        '0 0 10px rgba(57, 255, 20, 0.25)',
+        'glow-cyan': '0 0 10px rgba(0, 204, 68, 0.30)',
+        'glow-red':  '0 0 10px rgba(248, 81, 73, 0.30)',
       },
       backdropBlur: {
         xs: '2px',
@@ -56,17 +69,27 @@ export default {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
         },
-        // Soft border-color pulse — replaces the old emerald glow pulse.
-        // Class name preserved (animate-pulse-glow) for the UPI tray.
+        // Soft neon border-color pulse — used by the UPI tray.
         pulseGlow: {
-          '0%, 100%': { borderColor: 'var(--border-subtle)' },
-          '50%': { borderColor: 'var(--nebula-violet)' },
+          '0%, 100%': {
+            borderColor: 'var(--border-subtle)',
+            boxShadow: '0 0 0 rgba(57, 255, 20, 0)',
+          },
+          '50%': {
+            borderColor: 'rgb(var(--nebula-violet))',
+            boxShadow: '0 0 14px rgba(57, 255, 20, 0.35)',
+          },
+        },
+        caretBlink: {
+          '0%, 49%': { opacity: '1' },
+          '50%, 100%': { opacity: '0' },
         },
       },
       animation: {
         shake: 'shake 0.45s ease-in-out',
         orbit: 'orbit 2.4s linear infinite',
         'pulse-glow': 'pulseGlow 2.4s ease-in-out infinite',
+        'caret-blink': 'caretBlink 1s steps(1, end) infinite',
       },
     },
   },

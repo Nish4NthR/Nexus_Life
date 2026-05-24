@@ -6,15 +6,15 @@ const ICONS = ['⌖', '🚭', '🍔', '📱', '🍷', '☕', '🎰', '🍩', '�
 const COLORS = [
   { name: 'Red',    value: '#f85149' },
   { name: 'Amber',  value: '#d29922' },
-  { name: 'Blue',   value: '#58a6ff' },
-  { name: 'Sky',    value: '#79c0ff' },
+  { name: 'Neon',   value: '#39ff14' },
+  { name: 'Green',  value: '#00cc44' },
 ];
 
 const empty = {
   name: '',
   why: '',
   icon: '⌖',
-  color: '#EF4444',
+  color: '#f85149',
   startedAt: todayKey(),
 };
 

@@ -49,11 +49,12 @@ import {
 import { MOODS } from '../store/useJournalStore.js';
 
 const tooltipStyle = {
-  background: 'rgba(13,17,23,0.92)',
-  border: '1px solid rgba(56,139,253,0.4)',
+  background: '#000',
+  border: '1px solid rgba(57,255,20,0.45)',
   borderRadius: 8,
-  color: '#fff',
+  color: '#e7ffe7',
   fontSize: 12,
+  boxShadow: '0 0 10px rgba(57,255,20,0.20)',
 };
 
 export default function Analytics() {
@@ -452,7 +453,7 @@ export default function Analytics() {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-20 blur-3xl"
-          style={{ background: 'radial-gradient(circle, #58a6ff 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, #39ff14 0%, transparent 70%)' }}
         />
         <div className="relative">
           <div className="text-[10px] uppercase tracking-[0.3em] text-nebula-violet">
@@ -472,22 +473,22 @@ export default function Analytics() {
             <HeroStat
               label="Habits completed"
               value={lifetimeHabitsDone}
-              accent="#58a6ff"
+              accent="#39ff14"
             />
             <HeroStat
               label="Study time"
               value={formatMinutes(lifetimeStudyMin)}
-              accent="#79c0ff"
+              accent="#00cc44"
             />
             <HeroStat
               label="Best streak ever"
               value={`${longestHabitStreak}d`}
-              accent="#F59E0B"
+              accent="#d29922"
             />
             <HeroStat
               label="Longest clean"
               value={`${bestCleanStreak}d`}
-              accent="#238636"
+              accent="#5eead4"
             />
           </div>
         </div>
@@ -503,21 +504,21 @@ export default function Analytics() {
           unit="%"
           now={wow.habitsThis}
           prev={wow.habitsLast}
-          accent="#58a6ff"
+          accent="#39ff14"
         />
         <WowCard
           label="Study minutes"
           unit="m"
           now={wow.studyThis}
           prev={wow.studyLast}
-          accent="#79c0ff"
+          accent="#00cc44"
         />
         <WowCard
           label="Avg mood"
           unit="/5"
           now={wow.moodThis ? Number(wow.moodThis.toFixed(2)) : null}
           prev={wow.moodLast ? Number(wow.moodLast.toFixed(2)) : null}
-          accent="#238636"
+          accent="#5eead4"
           higherIsBetter
           smallNumber
         />
@@ -526,7 +527,7 @@ export default function Analytics() {
           unit="₹"
           now={Math.round(wow.spendThis)}
           prev={Math.round(wow.spendLast)}
-          accent="#F59E0B"
+          accent="#d29922"
           higherIsBetter={false}
         />
       </div>
@@ -536,25 +537,25 @@ export default function Analytics() {
         <Metric
           label="Habit Consistency"
           value={`${habitConsistency}%`}
-          accent="#58a6ff"
+          accent="#39ff14"
           sub="last 7 days"
         />
         <Metric
           label="Best Habit Streak"
           value={`${longestHabitStreak}d`}
-          accent="#F59E0B"
+          accent="#d29922"
           sub="all-time"
         />
         <Metric
           label="Study This Week"
           value={formatMinutes(weekStudyMin)}
-          accent="#79c0ff"
+          accent="#00cc44"
           sub={`${learnStreak}d streak`}
         />
         <Metric
           label="Goals Active / Done"
           value={`${activeGoals} / ${completedGoals}`}
-          accent="#238636"
+          accent="#5eead4"
           sub={`${avgGoalProgress}% avg`}
         />
       </div>
@@ -567,11 +568,11 @@ export default function Analytics() {
           </h2>
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-500">
             <span>Less</span>
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(255,255,255,0.06)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(56,139,253,0.30)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(56,139,253,0.65)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(56,139,253,0.95)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: '#58a6ff', boxShadow: '0 0 6px #58a6ffaa' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.06)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.30)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.55)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.85)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: '#39ff14', boxShadow: '0 0 6px #39ff14aa' }} />
             <span>More</span>
           </div>
         </div>
@@ -610,9 +611,9 @@ export default function Analytics() {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#58a6ff"
+                  stroke="#39ff14"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#79c0ff' }}
+                  dot={{ r: 3, fill: '#00cc44' }}
                   connectNulls
                 />
               </LineChart>
@@ -629,8 +630,8 @@ export default function Analytics() {
               <AreaChart data={study30}>
                 <defs>
                   <linearGradient id="studyGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#79c0ff" stopOpacity={0.6} />
-                    <stop offset="100%" stopColor="#79c0ff" stopOpacity={0.05} />
+                    <stop offset="0%" stopColor="#39ff14" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="#39ff14" stopOpacity={0.04} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,0.05)" />
@@ -644,7 +645,7 @@ export default function Analytics() {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#79c0ff"
+                  stroke="#39ff14"
                   strokeWidth={2}
                   fill="url(#studyGrad)"
                 />
@@ -662,8 +663,8 @@ export default function Analytics() {
               <AreaChart data={spend30}>
                 <defs>
                   <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.6} />
-                    <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.05} />
+                    <stop offset="0%" stopColor="#d29922" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="#d29922" stopOpacity={0.04} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,0.05)" />
@@ -680,7 +681,7 @@ export default function Analytics() {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#F59E0B"
+                  stroke="#d29922"
                   strokeWidth={2}
                   fill="url(#spendGrad)"
                 />
@@ -785,7 +786,7 @@ export default function Analytics() {
               icon="🏆"
               label="Longest habit streak"
               value={longestHabitStreak ? `${longestHabitStreak} days` : '—'}
-              accent="#F59E0B"
+              accent="#d29922"
             />
             <RecordRow
               icon="📚"
@@ -797,7 +798,7 @@ export default function Analytics() {
                     )}`
                   : '—'
               }
-              accent="#79c0ff"
+              accent="#00cc44"
             />
             <RecordRow
               icon="✓"
@@ -809,13 +810,13 @@ export default function Analytics() {
                     )}`
                   : '—'
               }
-              accent="#58a6ff"
+              accent="#39ff14"
             />
             <RecordRow
               icon="🛡"
               label="Longest clean stretch"
               value={bestCleanStreak ? `${bestCleanStreak} days` : '—'}
-              accent="#238636"
+              accent="#5eead4"
             />
             <RecordRow
               icon="💸"
@@ -883,7 +884,7 @@ export default function Analytics() {
                   style={{
                     width: `${Math.min(100, (monthExpenseTotal / totalBudget) * 100)}%`,
                     background:
-                      monthExpenseTotal > totalBudget ? '#f85149' : '#238636',
+                      monthExpenseTotal > totalBudget ? '#f85149' : '#39ff14',
                     boxShadow:
                       monthExpenseTotal > totalBudget
                         ? '0 0 12px #f85149aa'
@@ -1197,12 +1198,12 @@ function Heatmap({ days }) {
 
   const colorFor = (pct) => {
     if (pct == null) return 'transparent';
-    if (pct === 0) return 'rgba(255,255,255,0.06)';
-    if (pct < 0.25) return 'rgba(56,139,253,0.30)';
-    if (pct < 0.5) return 'rgba(56,139,253,0.50)';
-    if (pct < 0.75) return 'rgba(56,139,253,0.75)';
-    if (pct < 1) return 'rgba(56,139,253,0.95)';
-    return '#58a6ff';
+    if (pct === 0) return 'rgba(57,255,20,0.05)';
+    if (pct < 0.25) return 'rgba(57,255,20,0.25)';
+    if (pct < 0.5) return 'rgba(57,255,20,0.50)';
+    if (pct < 0.75) return 'rgba(57,255,20,0.75)';
+    if (pct < 1) return 'rgba(57,255,20,0.95)';
+    return '#39ff14';
   };
 
   const dowLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -1215,7 +1216,7 @@ function Heatmap({ days }) {
     >
       <div className="inline-flex gap-3">
         {/* Sticky left rail: DoW labels */}
-        <div className="sticky left-0 z-10 flex flex-col gap-1 bg-[#161b22] pr-1 pt-[18px]">
+        <div className="sticky left-0 z-10 flex flex-col gap-1 bg-space-700 pr-1 pt-[18px]">
           {dowLabels.map((d, i) => (
             <div
               key={d}
@@ -1263,7 +1264,7 @@ function Heatmap({ days }) {
                       style={{
                         background: colorFor(cell.pct),
                         boxShadow:
-                          cell.pct >= 1 ? '0 0 6px rgba(56,139,253,0.8)' : undefined,
+                          cell.pct >= 1 ? '0 0 6px rgba(57,255,20,0.8)' : undefined,
                       }}
                     />
                   );

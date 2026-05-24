@@ -161,10 +161,10 @@ export default function Expenses() {
 
       {/* Summary */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Stat label="Today" value={formatINR(stats.today)} accent="#79c0ff" />
-        <Stat label="This Week" value={formatINR(stats.weekTotal)} accent="#58a6ff" />
-        <Stat label="This Month" value={formatINR(stats.monthTotal)} accent="#F59E0B" />
-        <Stat label="Entries" value={stats.count} accent="#238636" />
+        <Stat label="Today" value={formatINR(stats.today)} accent="#39ff14" />
+        <Stat label="This Week" value={formatINR(stats.weekTotal)} accent="#00cc44" />
+        <Stat label="This Month" value={formatINR(stats.monthTotal)} accent="#d29922" />
+        <Stat label="Entries" value={stats.count} accent="#5eead4" />
       </div>
 
       {/* Pending UPI tray — shown when configured OR when there's something pending */}
