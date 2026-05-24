@@ -12,7 +12,7 @@ crons = ["30 2 * * *", "30 15 * * *"]
 # Then paste the returned `id` below.
 [[kv_namespaces]]
 binding = "ACTION_QUEUE"
-id = "REPLACE_WITH_KV_ID"
+id = "59f0a442fb2b489ab7a22637981e0ccd"
 
 # Secrets — set via `wrangler secret put`, NOT here. NEVER paste real values
 # into this file (it's committed to source control):

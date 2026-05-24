@@ -18,3 +18,5 @@ functions/*/node_modules
 workers/*/node_modules
 workers/*/.wrangler
 workers/*/.dev.vars
+
+.vercel

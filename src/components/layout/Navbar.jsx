@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useDriveAuthStore } from '../../store/useDriveAuthStore.js';
-import ThemeToggle from '../ui/ThemeToggle.jsx';
 
 const NAV = [
   { to: '/',           label: 'dashboard'  },
@@ -59,8 +58,7 @@ export default function Navbar() {
         <div className="flex-1 md:hidden" />
 
         {/* Desktop right cluster */}
-        <div className="hidden shrink-0 items-center gap-2 md:flex">
-          <ThemeToggle />
+        <div className="hidden shrink-0 items-center gap-3 md:flex">
           <span className="hidden font-mono text-[11px] text-nebula-cyan lg:inline">
             {username}
           </span>
@@ -72,8 +70,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile cluster */}
-        <ThemeToggle className="md:hidden" />
+        {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen((v) => !v)}
           aria-label="Toggle navigation"
