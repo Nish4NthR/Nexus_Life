@@ -79,9 +79,9 @@ export default function BadHabits() {
 
       {/* Summary */}
       <div className="mt-6 grid grid-cols-3 gap-4">
-        <Stat label="Tracking" value={stats.total} accent="#7C3AED" />
-        <Stat label="Best Run" value={`${stats.longest}d`} accent="#10B981" />
-        <Stat label="Total Days Clean" value={stats.totalDaysClean} accent="#06B6D4" />
+        <Stat label="Tracking" value={stats.total} accent="#58a6ff" />
+        <Stat label="Best Run" value={`${stats.longest}d`} accent="#238636" />
+        <Stat label="Total Days Clean" value={stats.totalDaysClean} accent="#79c0ff" />
       </div>
 
       {loading && !loaded && (

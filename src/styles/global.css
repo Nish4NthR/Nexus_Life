@@ -14,52 +14,48 @@
   }
 
   body {
-    @apply font-sans text-slate-100 antialiased;
-    background:
-      radial-gradient(ellipse at top, rgba(5, 150, 105, 0.14), transparent 55%),
-      radial-gradient(ellipse at bottom right, rgba(52, 211, 153, 0.08), transparent 55%),
-      linear-gradient(180deg, #050a08 0%, #0a1410 60%, #050a08 100%);
-    background-attachment: fixed;
+    @apply font-sans antialiased;
+    color: #c9d1d9;
+    background: #0d1117;
     min-height: 100vh;
     overflow-x: hidden;
   }
 
   h1, h2, h3, h4 {
     @apply font-display;
+    color: #f0f6fc;
     letter-spacing: -0.01em;
   }
 
   ::selection {
-    background: rgba(5, 150, 105, 0.45);
+    background: rgba(56, 139, 253, 0.4);
     color: #fff;
   }
 }
 
 @layer components {
+  /* Flat GitHub-style surface — no blur, no glow. */
   .glass {
-    background: rgba(14, 27, 22, 0.55);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid rgba(5, 150, 105, 0.22);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: #161b22;
+    border: 1px solid #30363d;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
   }
 
   .glass-strong {
-    background: rgba(10, 20, 16, 0.74);
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    border: 1px solid rgba(52, 211, 153, 0.26);
+    background: #0d1117;
+    border: 1px solid #30363d;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
+  /* No-op — GitHub doesn't glow text. Kept the class so JSX still compiles. */
   .text-glow {
-    text-shadow: 0 0 12px rgba(5, 150, 105, 0.55), 0 0 24px rgba(52, 211, 153, 0.30);
+    text-shadow: none;
   }
 
   .ring-nebula {
-    box-shadow:
-      0 0 0 1px rgba(5, 150, 105, 0.4),
-      0 0 24px rgba(5, 150, 105, 0.4);
+    box-shadow: 0 0 0 1px #30363d;
   }
 }

@@ -9,10 +9,10 @@ import { todayKey } from '../utils/dateHelpers.js';
 
 export const EXPENSE_CATEGORIES = [
   { id: 'food',           label: 'Food',          icon: '🍽',  color: '#F59E0B' },
-  { id: 'transport',      label: 'Transport',     icon: '🚗',  color: '#06B6D4' },
-  { id: 'shopping',       label: 'Shopping',      icon: '🛍',  color: '#7C3AED' },
+  { id: 'transport',      label: 'Transport',     icon: '🚗',  color: '#79c0ff' },
+  { id: 'shopping',       label: 'Shopping',      icon: '🛍',  color: '#58a6ff' },
   { id: 'entertainment',  label: 'Entertainment', icon: '🎬',  color: '#EF4444' },
-  { id: 'health',         label: 'Health',        icon: '💊',  color: '#10B981' },
+  { id: 'health',         label: 'Health',        icon: '💊',  color: '#238636' },
   { id: 'education',      label: 'Education',     icon: '📚',  color: '#3B82F6' },
   { id: 'others',         label: 'Others',        icon: '✦',   color: '#94A3B8' },
 ];

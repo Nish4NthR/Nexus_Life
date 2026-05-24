@@ -132,9 +132,9 @@ export default function Learning() {
       {/* Summary */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Streak" value={`${streak}d`} accent="#F59E0B" />
-        <Stat label="This Week" value={formatMinutes(weekMin)} accent="#06B6D4" />
-        <Stat label="This Month" value={formatMinutes(monthMin)} accent="#7C3AED" />
-        <Stat label="Tracking" value={items.length} accent="#10B981" />
+        <Stat label="This Week" value={formatMinutes(weekMin)} accent="#79c0ff" />
+        <Stat label="This Month" value={formatMinutes(monthMin)} accent="#58a6ff" />
+        <Stat label="Tracking" value={items.length} accent="#238636" />
       </div>
 
       {/* AI Next Mission */}

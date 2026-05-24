@@ -43,8 +43,8 @@ import {
 import { computeLongestStreak, computeStreak } from '../utils/streakLogic.js';
 
 const tooltipStyle = {
-  background: 'rgba(10,10,31,0.92)',
-  border: '1px solid rgba(124,58,237,0.4)',
+  background: 'rgba(13,17,23,0.92)',
+  border: '1px solid rgba(56,139,253,0.4)',
   borderRadius: 8,
   color: '#fff',
   fontSize: 12,
@@ -423,7 +423,7 @@ export default function Analytics() {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full opacity-20 blur-3xl"
-          style={{ background: 'radial-gradient(circle, #7C3AED 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, #58a6ff 0%, transparent 70%)' }}
         />
         <div className="relative">
           <div className="text-[10px] uppercase tracking-[0.3em] text-nebula-violet">
@@ -443,12 +443,12 @@ export default function Analytics() {
             <HeroStat
               label="Habits completed"
               value={lifetimeHabitsDone}
-              accent="#7C3AED"
+              accent="#58a6ff"
             />
             <HeroStat
               label="Study time"
               value={formatMinutes(lifetimeStudyMin)}
-              accent="#06B6D4"
+              accent="#79c0ff"
             />
             <HeroStat
               label="Best streak ever"
@@ -458,7 +458,7 @@ export default function Analytics() {
             <HeroStat
               label="Longest clean"
               value={`${bestCleanStreak}d`}
-              accent="#10B981"
+              accent="#238636"
             />
           </div>
         </div>
@@ -474,21 +474,21 @@ export default function Analytics() {
           unit="%"
           now={wow.habitsThis}
           prev={wow.habitsLast}
-          accent="#7C3AED"
+          accent="#58a6ff"
         />
         <WowCard
           label="Study minutes"
           unit="m"
           now={wow.studyThis}
           prev={wow.studyLast}
-          accent="#06B6D4"
+          accent="#79c0ff"
         />
         <WowCard
           label="Avg mood"
           unit="/5"
           now={wow.moodThis ? Number(wow.moodThis.toFixed(2)) : null}
           prev={wow.moodLast ? Number(wow.moodLast.toFixed(2)) : null}
-          accent="#10B981"
+          accent="#238636"
           higherIsBetter
           smallNumber
         />
@@ -507,7 +507,7 @@ export default function Analytics() {
         <Metric
           label="Habit Consistency"
           value={`${habitConsistency}%`}
-          accent="#7C3AED"
+          accent="#58a6ff"
           sub="last 7 days"
         />
         <Metric
@@ -519,13 +519,13 @@ export default function Analytics() {
         <Metric
           label="Study This Week"
           value={formatMinutes(weekStudyMin)}
-          accent="#06B6D4"
+          accent="#79c0ff"
           sub={`${learnStreak}d streak`}
         />
         <Metric
           label="Goals Active / Done"
           value={`${activeGoals} / ${completedGoals}`}
-          accent="#10B981"
+          accent="#238636"
           sub={`${avgGoalProgress}% avg`}
         />
       </div>
@@ -539,10 +539,10 @@ export default function Analytics() {
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-500">
             <span>Less</span>
             <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(255,255,255,0.06)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(124,58,237,0.30)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(124,58,237,0.65)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(124,58,237,0.95)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: '#7C3AED', boxShadow: '0 0 6px #7C3AEDaa' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(56,139,253,0.30)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(56,139,253,0.65)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(56,139,253,0.95)' }} />
+            <span className="h-3 w-3 rounded-sm" style={{ background: '#58a6ff', boxShadow: '0 0 6px #58a6ffaa' }} />
             <span>More</span>
           </div>
         </div>
@@ -581,9 +581,9 @@ export default function Analytics() {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#7C3AED"
+                  stroke="#58a6ff"
                   strokeWidth={2}
-                  dot={{ r: 3, fill: '#06B6D4' }}
+                  dot={{ r: 3, fill: '#79c0ff' }}
                   connectNulls
                 />
               </LineChart>
@@ -600,8 +600,8 @@ export default function Analytics() {
               <AreaChart data={study30}>
                 <defs>
                   <linearGradient id="studyGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#06B6D4" stopOpacity={0.6} />
-                    <stop offset="100%" stopColor="#06B6D4" stopOpacity={0.05} />
+                    <stop offset="0%" stopColor="#79c0ff" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#79c0ff" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,0.05)" />
@@ -615,7 +615,7 @@ export default function Analytics() {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#06B6D4"
+                  stroke="#79c0ff"
                   strokeWidth={2}
                   fill="url(#studyGrad)"
                 />
@@ -768,7 +768,7 @@ export default function Analytics() {
                     )}`
                   : '—'
               }
-              accent="#06B6D4"
+              accent="#79c0ff"
             />
             <RecordRow
               icon="✓"
@@ -780,13 +780,13 @@ export default function Analytics() {
                     )}`
                   : '—'
               }
-              accent="#7C3AED"
+              accent="#58a6ff"
             />
             <RecordRow
               icon="🛡"
               label="Longest clean stretch"
               value={bestCleanStreak ? `${bestCleanStreak} days` : '—'}
-              accent="#10B981"
+              accent="#238636"
             />
             <RecordRow
               icon="💸"
@@ -798,7 +798,7 @@ export default function Analytics() {
                     )}`
                   : '—'
               }
-              accent="#EF4444"
+              accent="#f85149"
             />
           </div>
         </GlassCard>
@@ -854,10 +854,10 @@ export default function Analytics() {
                   style={{
                     width: `${Math.min(100, (monthExpenseTotal / totalBudget) * 100)}%`,
                     background:
-                      monthExpenseTotal > totalBudget ? '#EF4444' : '#10B981',
+                      monthExpenseTotal > totalBudget ? '#f85149' : '#238636',
                     boxShadow:
                       monthExpenseTotal > totalBudget
-                        ? '0 0 12px #EF4444aa'
+                        ? '0 0 12px #f85149aa'
                         : undefined,
                   }}
                 />
@@ -1135,11 +1135,11 @@ function Heatmap({ days }) {
   const colorFor = (pct) => {
     if (pct == null) return 'transparent';
     if (pct === 0) return 'rgba(255,255,255,0.06)';
-    if (pct < 0.25) return 'rgba(124,58,237,0.30)';
-    if (pct < 0.5) return 'rgba(124,58,237,0.50)';
-    if (pct < 0.75) return 'rgba(124,58,237,0.75)';
-    if (pct < 1) return 'rgba(124,58,237,0.95)';
-    return '#7C3AED';
+    if (pct < 0.25) return 'rgba(56,139,253,0.30)';
+    if (pct < 0.5) return 'rgba(56,139,253,0.50)';
+    if (pct < 0.75) return 'rgba(56,139,253,0.75)';
+    if (pct < 1) return 'rgba(56,139,253,0.95)';
+    return '#58a6ff';
   };
 
   const dowLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -1187,7 +1187,7 @@ function Heatmap({ days }) {
                     style={{
                       background: colorFor(cell.pct),
                       boxShadow:
-                        cell.pct >= 1 ? '0 0 6px rgba(124,58,237,0.8)' : undefined,
+                        cell.pct >= 1 ? '0 0 6px rgba(56,139,253,0.8)' : undefined,
                     }}
                   />
                 );

@@ -4,7 +4,7 @@ export default function MilestoneChecklist({
   milestones = [],
   onToggle,
   compact = false,
-  color = '#7C3AED',
+  color = '#58a6ff',
 }) {
   if (!milestones.length) {
     return (

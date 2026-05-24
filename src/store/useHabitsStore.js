@@ -7,7 +7,7 @@ import { computeStreak, computeLongestStreak } from '../utils/streakLogic.js';
  * Habit shape:
  *   {
  *     id, name, category, frequency: 'daily'|'weekly',
- *     time: '07:00' | null, icon: '🧘', color: '#7C3AED',
+ *     time: '07:00' | null, icon: '🧘', color: '#58a6ff',
  *     createdAt, archived: false, xpPerCompletion: 10
  *   }
  *
@@ -16,10 +16,10 @@ import { computeStreak, computeLongestStreak } from '../utils/streakLogic.js';
  */
 
 const CATEGORY_COLORS = {
-  health: '#10B981',
-  learning: '#06B6D4',
+  health: '#238636',
+  learning: '#79c0ff',
   fitness: '#F59E0B',
-  mindfulness: '#7C3AED',
+  mindfulness: '#58a6ff',
   productivity: '#EF4444',
 };
 
@@ -66,7 +66,7 @@ export const useHabitsStore = create((set, get) => ({
       frequency: input.frequency || 'daily',
       time: input.time || null,
       icon: input.icon || '✦',
-      color: input.color || CATEGORY_COLORS[input.category] || '#7C3AED',
+      color: input.color || CATEGORY_COLORS[input.category] || '#58a6ff',
       createdAt: now,
       archived: false,
       xpPerCompletion: input.xpPerCompletion || 10,

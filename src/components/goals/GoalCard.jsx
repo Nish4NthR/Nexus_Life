@@ -17,7 +17,7 @@ export default function GoalCard({ goal, onEdit }) {
   const days = daysUntil(goal.targetDate);
   const overdue = isOverdue(goal);
   const isComplete = goal.status === 'completed';
-  const color = goal.color || '#7C3AED';
+  const color = goal.color || '#58a6ff';
 
   const visibleMilestones = expanded
     ? goal.milestones

@@ -167,14 +167,14 @@ export default function Dashboard() {
           title="Habits"
           value={`${habitsDone}/${activeHabits.length}`}
           sub={topStreak ? `🔥 ${topStreak}d streak` : 'no streak'}
-          accent="#7C3AED"
+          accent="#58a6ff"
           to="/habits"
         />
         <Module
           title="Goals"
           value={activeGoals.length}
           sub={`${goals.filter((g) => g.status === 'completed').length} done`}
-          accent="#06B6D4"
+          accent="#79c0ff"
           to="/goals"
         />
         <Module
@@ -188,7 +188,7 @@ export default function Dashboard() {
           title="Learning"
           value={`${learnStreak}d`}
           sub={`${learningItems.length} tracked`}
-          accent="#10B981"
+          accent="#238636"
           to="/learning"
         />
         <Module
@@ -287,8 +287,8 @@ export default function Dashboard() {
                   <LineChart data={sparkline}>
                     <Tooltip
                       contentStyle={{
-                        background: 'rgba(10,10,31,0.9)',
-                        border: '1px solid rgba(124,58,237,0.4)',
+                        background: 'rgba(13,17,23,0.9)',
+                        border: '1px solid rgba(56,139,253,0.4)',
                         borderRadius: 8,
                         color: '#fff',
                         fontSize: 11,
@@ -298,7 +298,7 @@ export default function Dashboard() {
                     <Line
                       type="monotone"
                       dataKey="value"
-                      stroke="#06B6D4"
+                      stroke="#79c0ff"
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 4 }}
@@ -337,8 +337,8 @@ export default function Dashboard() {
                       className="h-full rounded-full"
                       style={{
                         width: `${p.percent}%`,
-                        background: g.color || '#7C3AED',
-                        boxShadow: `0 0 10px ${g.color || '#7C3AED'}aa`,
+                        background: g.color || '#58a6ff',
+                        boxShadow: `0 0 10px ${g.color || '#58a6ff'}aa`,
                       }}
                     />
                   </div>

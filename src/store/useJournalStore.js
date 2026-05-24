@@ -10,9 +10,9 @@ import { todayKey } from '../utils/dateHelpers.js';
  */
 
 export const MOODS = [
-  { id: 'amazing',  label: 'Amazing',  emoji: '🚀', color: '#10B981', value: 5 },
-  { id: 'good',     label: 'Good',     emoji: '✨', color: '#06B6D4', value: 4 },
-  { id: 'okay',     label: 'Okay',     emoji: '🌗', color: '#7C3AED', value: 3 },
+  { id: 'amazing',  label: 'Amazing',  emoji: '🚀', color: '#238636', value: 5 },
+  { id: 'good',     label: 'Good',     emoji: '✨', color: '#79c0ff', value: 4 },
+  { id: 'okay',     label: 'Okay',     emoji: '🌗', color: '#58a6ff', value: 3 },
   { id: 'bad',      label: 'Bad',      emoji: '🌧', color: '#F59E0B', value: 2 },
   { id: 'terrible', label: 'Terrible', emoji: '🕳', color: '#EF4444', value: 1 },
 ];

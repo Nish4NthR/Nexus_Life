@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
  * Particle burst — renders a fixed-position explosion of dots at click position.
  * Auto-unmounts via onComplete prop. Use sparingly (one at a time).
  */
-export default function ParticleBurst({ x, y, color = '#7C3AED', count = 14, onComplete }) {
+export default function ParticleBurst({ x, y, color = '#58a6ff', count = 14, onComplete }) {
   const particles = Array.from({ length: count }, (_, i) => i);
   return (
     <div

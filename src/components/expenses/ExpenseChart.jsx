@@ -134,7 +134,7 @@ export default function ExpenseChart({ expenses }) {
               <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} />
               <YAxis stroke="#94a3b8" fontSize={10} tickFormatter={(v) => `₹${v}`} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v) => formatINR(v)} />
-              <Bar dataKey="value" fill="#7C3AED" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="value" fill="#58a6ff" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -149,10 +149,10 @@ export default function ExpenseChart({ expenses }) {
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#06B6D4"
+                stroke="#79c0ff"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 5, fill: '#06B6D4' }}
+                activeDot={{ r: 5, fill: '#79c0ff' }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -163,8 +163,8 @@ export default function ExpenseChart({ expenses }) {
 }
 
 const tooltipStyle = {
-  background: 'rgba(10,10,31,0.9)',
-  border: '1px solid rgba(124,58,237,0.4)',
+  background: 'rgba(13,17,23,0.9)',
+  border: '1px solid rgba(56,139,253,0.4)',
   borderRadius: 8,
   color: '#fff',
   fontSize: 12,

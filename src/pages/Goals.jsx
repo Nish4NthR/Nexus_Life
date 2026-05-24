@@ -108,10 +108,10 @@ export default function Goals() {
 
       {/* Summary strip */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Stat label="Active" value={counts.active} accent="#06B6D4" />
-        <Stat label="Completed" value={counts.completed} accent="#10B981" />
+        <Stat label="Active" value={counts.active} accent="#79c0ff" />
+        <Stat label="Completed" value={counts.completed} accent="#238636" />
         <Stat label="Overdue" value={counts.overdue} accent="#EF4444" />
-        <Stat label="Total" value={counts.total} accent="#7C3AED" />
+        <Stat label="Total" value={counts.total} accent="#58a6ff" />
       </div>
 
       {/* Filter pills */}

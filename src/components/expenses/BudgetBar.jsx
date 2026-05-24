@@ -53,7 +53,7 @@ export default function BudgetBar({ expenses, budgets, onEditBudget }) {
           !limit ? '#94a3b8' :
           pct > 90 ? '#EF4444' :
           pct > 60 ? '#F59E0B' :
-          '#10B981';
+          '#238636';
 
         return (
           <button

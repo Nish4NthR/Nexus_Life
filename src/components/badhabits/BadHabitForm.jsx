@@ -4,10 +4,10 @@ import { todayKey } from '../../utils/dateHelpers.js';
 
 const ICONS = ['⌖', '🚭', '🍔', '📱', '🍷', '☕', '🎰', '🍩', '🌙'];
 const COLORS = [
-  { name: 'Red',    value: '#EF4444' },
-  { name: 'Amber',  value: '#F59E0B' },
-  { name: 'Violet', value: '#7C3AED' },
-  { name: 'Cyan',   value: '#06B6D4' },
+  { name: 'Red',    value: '#f85149' },
+  { name: 'Amber',  value: '#d29922' },
+  { name: 'Blue',   value: '#58a6ff' },
+  { name: 'Sky',    value: '#79c0ff' },
 ];
 
 const empty = {

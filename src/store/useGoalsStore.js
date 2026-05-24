@@ -14,9 +14,9 @@ import { readJSON, writeJSON, FILES } from '../drive/driveClient.js';
 
 const CATEGORY_COLORS = {
   career: '#F59E0B',
-  health: '#10B981',
-  learning: '#06B6D4',
-  financial: '#7C3AED',
+  health: '#238636',
+  learning: '#79c0ff',
+  financial: '#58a6ff',
   personal: '#EF4444',
 };
 
@@ -67,7 +67,7 @@ export const useGoalsStore = create((set, get) => ({
       title: input.title.trim(),
       description: (input.description || '').trim(),
       category: input.category || 'personal',
-      color: input.color || CATEGORY_COLORS[input.category] || '#7C3AED',
+      color: input.color || CATEGORY_COLORS[input.category] || '#58a6ff',
       targetDate: input.targetDate || null,
       status: 'active',
       milestones,

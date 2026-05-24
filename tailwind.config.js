@@ -1,32 +1,44 @@
 /** @type {import('tailwindcss').Config} */
+const SYSTEM_STACK = [
+  '-apple-system',
+  'BlinkMacSystemFont',
+  '"Segoe UI"',
+  'Helvetica',
+  'Arial',
+  'sans-serif',
+];
+
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       fontFamily: {
-        display: ['Outfit', 'Inter', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        // Both `display` and `sans` resolve to the OS system stack so the app
+        // reads like github.com. Class names like `font-display` still work.
+        display: SYSTEM_STACK,
+        sans: SYSTEM_STACK,
       },
       colors: {
-        // Class names kept (nebula-*) so existing JSX continues to work.
-        // Values remapped to a deep-emerald / nature palette.
+        // Class names kept (nebula-*, space-*) so existing JSX continues to work.
+        // Values remapped to the github.com dark palette.
         nebula: {
-          violet: '#059669', // emerald 600 — primary accent (was purple)
-          cyan: '#34D399',   // emerald 400 — light accent (was cyan)
-          amber: '#F59E0B',  // amber — budget warnings, kept
-          red: '#EF4444',    // red — danger, kept
-          green: '#22C55E',  // green-500 — success, slightly brighter
+          violet: '#58a6ff', // GitHub link blue — primary accent
+          cyan: '#79c0ff',   // GitHub light blue — hover / light accent
+          amber: '#d29922',  // GitHub yellow — warnings
+          red: '#f85149',    // GitHub red — danger
+          green: '#238636',  // GitHub primary-button green — success
         },
         space: {
-          900: '#050a08',
-          800: '#0a1410',
-          700: '#0e1b16',
+          900: '#010409', // outermost canvas
+          800: '#0d1117', // page background
+          700: '#161b22', // card / surface
         },
       },
       boxShadow: {
-        glow: '0 0 24px rgba(5, 150, 105, 0.40)',
-        'glow-cyan': '0 0 24px rgba(52, 211, 153, 0.40)',
-        'glow-red': '0 0 24px rgba(239, 68, 68, 0.55)',
+        // Flat 1px borders, no glow. Class names preserved for compatibility.
+        glow: '0 0 0 1px #30363d',
+        'glow-cyan': '0 0 0 1px #30363d',
+        'glow-red': '0 0 0 1px #f85149',
       },
       backdropBlur: {
         xs: '2px',
@@ -41,20 +53,17 @@ export default {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
         },
+        // Soft border-color pulse — replaces the old emerald glow pulse.
+        // Class name preserved (animate-pulse-glow) for the UPI tray.
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 16px rgba(5,150,105,0.30)' },
-          '50%': { boxShadow: '0 0 32px rgba(52,211,153,0.60)' },
-        },
-        drift: {
-          '0%': { transform: 'translateY(0)' },
-          '100%': { transform: 'translateY(-12px)' },
+          '0%, 100%': { borderColor: '#30363d' },
+          '50%': { borderColor: '#58a6ff' },
         },
       },
       animation: {
         shake: 'shake 0.45s ease-in-out',
         orbit: 'orbit 2.4s linear infinite',
         'pulse-glow': 'pulseGlow 2.4s ease-in-out infinite',
-        drift: 'drift 4s ease-in-out infinite alternate',
       },
     },
   },

@@ -11,8 +11,8 @@ export default function OrbitSpinner({ size = 48, className = '' }) {
       <div
         className="absolute inset-0 rounded-full border-2 border-transparent animate-orbit"
         style={{
-          borderTopColor: '#7C3AED',
-          borderRightColor: '#06B6D4',
+          borderTopColor: '#58a6ff',
+          borderRightColor: '#79c0ff',
         }}
       />
       <div
