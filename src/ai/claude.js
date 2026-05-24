@@ -15,12 +15,13 @@
 import { useDriveAuthStore } from '../store/useDriveAuthStore.js';
 
 const PROXY_URL = import.meta.env.VITE_GEMINI_PROXY_URL;
+const PROXY_SECRET = import.meta.env.VITE_GEMINI_PROXY_SECRET;
 const DEFAULT_MODEL =
   import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash-lite';
 const HEAVY_MODEL = 'gemini-2.5-flash';
 
 export function isAIAvailable() {
-  return Boolean(PROXY_URL) && PROXY_URL.startsWith('http');
+  return Boolean(PROXY_URL) && PROXY_URL.startsWith('http') && Boolean(PROXY_SECRET);
 }
 
 function currentAccessToken() {
@@ -79,12 +80,8 @@ async function geminiGenerate({
   if (!isAIAvailable()) {
     throw new Error('VITE_GEMINI_PROXY_URL is not set in the build');
   }
-  const token = currentAccessToken();
-  if (!token) {
-    throw new Error(
-      'Not signed in to Google Drive (or session expired) — sign in on Settings to enable AI'
-    );
-  }
+  const token = currentAccessToken(); // still used for Drive, not for auth here
+  void token; // suppress unused warning
 
   const body = {
     contents: [
@@ -115,7 +112,7 @@ async function geminiGenerate({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'X-Client-Secret': PROXY_SECRET,
         },
         body: JSON.stringify(body),
       }
