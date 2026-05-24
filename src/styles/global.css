@@ -2,11 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    color-scheme: dark;
-  }
+/*
+ * App-wide theme tokens. Two palettes, switched by [data-theme="dark|light"]
+ * on the <html> element. tailwind.config.js maps `nebula-*` and `space-*`
+ * class names to these vars, so existing JSX auto-responds.
+ *
+ * Light-mode overrides for baked-in `text-slate-*` and `bg-black/*` utility
+ * classes live further down — they catch the ~80 places those classes are
+ * used without touching every component.
+ */
 
+:root {
+  color-scheme: dark;
+
+  /*
+   * Palette as SPACE-SEPARATED RGB CHANNELS (no rgb() wrapper). Tailwind
+   * composes alpha modifiers on top via `rgb(var(--x) / <alpha-value>)` —
+   * see tailwind.config.js. So `bg-nebula-violet/40` still works.
+   */
+  --nebula-violet: 88 166 255;   /* #58a6ff — primary accent / link blue */
+  --nebula-cyan:   121 192 255;  /* #79c0ff — light accent / hover */
+  --nebula-green:  35 134 54;    /* #238636 — success / primary button */
+  --nebula-amber:  210 153 34;   /* #d29922 — warning */
+  --nebula-red:    248 81 73;    /* #f85149 — danger */
+
+  --space-900: 1 4 9;            /* #010409 — outermost canvas */
+  --space-800: 13 17 23;         /* #0d1117 — page background */
+  --space-700: 22 27 34;         /* #161b22 — card / surface */
+
+  /* Text + chrome (full colors — never need alpha composition) */
+  --text-base:     #c9d1d9;
+  --text-strong:   #f0f6fc;
+  --text-muted:    #8b949e;
+  --text-faint:    #6e7681;
+  --border-subtle: #30363d;
+  --selection-bg:  rgba(56, 139, 253, 0.4);
+
+  /* Heatmap cell tints (low -> peak) */
+  --heat-empty: rgba(255, 255, 255, 0.05);
+  --heat-1:     rgba(56, 139, 253, 0.30);
+  --heat-2:     rgba(56, 139, 253, 0.55);
+  --heat-3:     rgba(56, 139, 253, 0.80);
+  --heat-peak:  #58a6ff;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --nebula-violet: 9 105 218;    /* #0969da */
+  --nebula-cyan:   33 139 255;   /* #218bff */
+  --nebula-green:  26 127 55;    /* #1a7f37 */
+  --nebula-amber:  154 103 0;    /* #9a6700 */
+  --nebula-red:    207 34 46;    /* #cf222e */
+
+  --space-900: 246 248 250;      /* #f6f8fa */
+  --space-800: 255 255 255;      /* #ffffff */
+  --space-700: 246 248 250;      /* #f6f8fa */
+
+  --text-base:     #1f2328;
+  --text-strong:   #0d1117;
+  --text-muted:    #57606a;
+  --text-faint:    #6e7781;
+  --border-subtle: #d0d7de;
+  --selection-bg:  rgba(9, 105, 218, 0.25);
+
+  --heat-empty: rgba(15, 23, 42, 0.06);
+  --heat-1:     rgba(9, 105, 218, 0.20);
+  --heat-2:     rgba(9, 105, 218, 0.45);
+  --heat-3:     rgba(9, 105, 218, 0.70);
+  --heat-peak:  #0969da;
+}
+
+@layer base {
   html,
   body,
   #root {
@@ -15,47 +82,91 @@
 
   body {
     @apply font-sans antialiased;
-    color: #c9d1d9;
-    background: #0d1117;
+    color: var(--text-base);
+    background: rgb(var(--space-800));
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   h1, h2, h3, h4 {
     @apply font-display;
-    color: #f0f6fc;
+    color: var(--text-strong);
     letter-spacing: -0.01em;
   }
 
   ::selection {
-    background: rgba(56, 139, 253, 0.4);
-    color: #fff;
+    background: var(--selection-bg);
+    color: var(--text-strong);
   }
 }
 
 @layer components {
   /* Flat GitHub-style surface — no blur, no glow. */
   .glass {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: rgb(var(--space-700));
+    border: 1px solid var(--border-subtle);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: none;
   }
 
   .glass-strong {
-    background: #0d1117;
-    border: 1px solid #30363d;
+    background: rgb(var(--space-800));
+    border: 1px solid var(--border-subtle);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  /* No-op — GitHub doesn't glow text. Kept the class so JSX still compiles. */
+  /*
+   * Premium glass card — used ONLY by the Habit Grid card on Analytics, NOT
+   * the other surfaces. Subtle gradient border + faint blur for depth.
+   */
+  .glass-premium {
+    background:
+      linear-gradient(180deg, rgb(var(--space-700) / 0.92), rgb(var(--space-700))),
+      radial-gradient(120% 80% at 0% 0%, rgb(var(--nebula-violet) / 0.14), transparent 60%);
+    border: 1px solid rgb(var(--nebula-violet) / 0.30);
+    box-shadow:
+      0 12px 40px -12px rgb(var(--nebula-violet) / 0.28),
+      inset 0 1px 0 rgb(var(--nebula-violet) / 0.18);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+  }
+
+  /* No-op — kept for compatibility with existing JSX. */
   .text-glow {
     text-shadow: none;
   }
 
   .ring-nebula {
-    box-shadow: 0 0 0 1px #30363d;
+    box-shadow: 0 0 0 1px var(--border-subtle);
   }
 }
+
+/*
+ * Light-mode overrides for the baked-in Tailwind utility classes that
+ * assume a dark background. We do NOT touch dark mode — these only
+ * activate under [data-theme="light"].
+ *
+ * If a class is missing here, it'll still work but read as the dark value;
+ * grep for `text-slate-`, `bg-black/`, `bg-white/`, `border-white/`
+ * occasionally to keep this in sync.
+ */
+:root[data-theme='light'] .text-slate-100,
+:root[data-theme='light'] .text-slate-200 { color: #1f2328; }
+:root[data-theme='light'] .text-slate-300 { color: #24292f; }
+:root[data-theme='light'] .text-slate-400 { color: #57606a; }
+:root[data-theme='light'] .text-slate-500 { color: #6e7781; }
+:root[data-theme='light'] .text-slate-600 { color: #8c959f; }
+
+:root[data-theme='light'] .bg-black\/20  { background-color: rgba(15, 23, 42, 0.04); }
+:root[data-theme='light'] .bg-black\/30  { background-color: rgba(15, 23, 42, 0.05); }
+:root[data-theme='light'] .bg-black\/40  { background-color: rgba(15, 23, 42, 0.06); }
+:root[data-theme='light'] .bg-black\/70  { background-color: rgba(15, 23, 42, 0.10); }
+
+:root[data-theme='light'] .border-white\/5  { border-color: rgba(15, 23, 42, 0.06); }
+:root[data-theme='light'] .border-white\/10 { border-color: rgba(15, 23, 42, 0.10); }
+
+:root[data-theme='light'] .bg-white\/5  { background-color: rgba(15, 23, 42, 0.04); }
+:root[data-theme='light'] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.06); }

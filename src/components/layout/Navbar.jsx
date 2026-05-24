@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useDriveAuthStore } from '../../store/useDriveAuthStore.js';
+import ThemeToggle from '../ui/ThemeToggle.jsx';
 
 const NAV = [
   { to: '/',           label: 'Dashboard',  icon: '◎' },
@@ -59,6 +60,7 @@ export default function Navbar() {
 
         {/* User / logout — desktop */}
         <div className="hidden shrink-0 items-center gap-2 md:flex">
+          <ThemeToggle />
           <span className="hidden text-[10px] uppercase tracking-[0.25em] text-slate-400 lg:inline">
             {username}
           </span>
@@ -69,6 +71,9 @@ export default function Navbar() {
             Disengage
           </button>
         </div>
+
+        {/* Mobile: theme toggle next to hamburger so it stays reachable */}
+        <ThemeToggle className="md:hidden" />
 
         {/* Mobile hamburger */}
         <button
