@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -41,6 +41,12 @@ import {
   todayKey,
 } from '../utils/dateHelpers.js';
 import { computeLongestStreak, computeStreak } from '../utils/streakLogic.js';
+import {
+  buildMonthlyReportCSV,
+  downloadCSV,
+  lastMonthRange,
+} from '../utils/csvExport.js';
+import { MOODS } from '../store/useJournalStore.js';
 
 const tooltipStyle = {
   background: 'rgba(13,17,23,0.92)',
@@ -163,10 +169,10 @@ export default function Analytics() {
     return Math.max(0, ...badHabits.map(daysClean));
   }, [badHabits]);
 
-  // ===== Habit heatmap (90 days) =====
+  // ===== Habit heatmap (1 year) =====
 
   const heatmapData = useMemo(() => {
-    const days = lastNDays(90);
+    const days = lastNDays(365);
     const total = activeHabits.length || 1;
     return days.map((d) => {
       const completedToday = new Set(
@@ -404,6 +410,29 @@ export default function Analytics() {
       .length,
   });
 
+  // ===== CSV download for last month =====
+
+  const handleDownloadLastMonth = () => {
+    const { csv, range } = buildMonthlyReportCSV({
+      habits,
+      habitLogs,
+      expenses,
+      expenseCategories: EXPENSE_CATEGORIES,
+      goals,
+      learningItems,
+      learningLogs,
+      learningTypes: LEARNING_TYPES,
+      badHabits,
+      moods,
+      moodMeta: MOODS,
+      journalEntries,
+    });
+    const safeLabel = range.label.replace(/\s+/g, '-');
+    downloadCSV(`nexuslife-${safeLabel}.csv`, csv);
+  };
+
+  const lastMonthLabel = lastMonthRange().label;
+
   return (
     <div>
       <div>
@@ -530,11 +559,11 @@ export default function Analytics() {
         />
       </div>
 
-      {/* ===== Habit heatmap (90 days) ===== */}
+      {/* ===== Habit heatmap (1 year) ===== */}
       <GlassCard hover={false} className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
-            Habit grid · 90 days
+            Habit grid · 1 year
           </h2>
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-500">
             <span>Less</span>
@@ -877,15 +906,24 @@ export default function Analytics() {
           <h2 className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
             ✺ Weekly Mission Report
           </h2>
-          {summary.available && (
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => summary.run(buildSummaryPayload())}
-              disabled={summary.loading}
-              className="rounded-lg border border-nebula-cyan/50 bg-nebula-cyan/15 px-3 py-1 text-[10px] uppercase tracking-widest text-nebula-cyan hover:bg-nebula-cyan/25 disabled:opacity-50"
+              onClick={handleDownloadLastMonth}
+              className="rounded-lg border border-nebula-violet/50 bg-nebula-violet/15 px-3 py-1 text-[10px] uppercase tracking-widest text-nebula-violet hover:bg-nebula-violet/25"
+              title={`Download ${lastMonthLabel} as CSV (opens in Excel)`}
             >
-              {summary.loading ? 'Composing…' : 'Generate'}
+              ⤓ Last month (.csv)
             </button>
-          )}
+            {summary.available && (
+              <button
+                onClick={() => summary.run(buildSummaryPayload())}
+                disabled={summary.loading}
+                className="rounded-lg border border-nebula-cyan/50 bg-nebula-cyan/15 px-3 py-1 text-[10px] uppercase tracking-widest text-nebula-cyan hover:bg-nebula-cyan/25 disabled:opacity-50"
+              >
+                {summary.loading ? 'Composing…' : 'Generate'}
+              </button>
+            )}
+          </div>
         </div>
         <div className="mt-4">
           {summary.loading && (
@@ -903,7 +941,7 @@ export default function Analytics() {
             <div className="text-sm text-slate-500">
               {summary.available
                 ? 'Tap "Generate" for a personalized recap of habits, expenses, goals, learning, and mood across the last 7 days.'
-                : 'AI not configured — add VITE_GEMINI_API_KEY to .env.'}
+                : 'AI not configured — VITE_GEMINI_PROXY_URL is missing from this build.'}
             </div>
           )}
           {summary.error && (
@@ -1100,12 +1138,14 @@ function RecordRow({ icon, label, value, accent }) {
 }
 
 /**
- * GitHub-style heatmap. 13 columns × 7 rows = 91 cells, oldest at left.
+ * GitHub-style heatmap. ~53 columns × 7 rows for a year of daily activity.
  * Rows are days-of-week (Sun→Sat). Each cell's color encodes that day's
- * habit-completion ratio.
+ * habit-completion ratio. Container scrolls horizontally; auto-scrolls to
+ * the right edge on mount so today is in view, scroll left for older months.
  */
 function Heatmap({ days }) {
   const today = todayKey();
+  const scrollerRef = useRef(null);
   const firstDate = days[0]?.date;
   let firstDay = new Date();
   if (firstDate) {
@@ -1114,7 +1154,7 @@ function Heatmap({ days }) {
   }
   const startWeekday = firstDay.getDay(); // 0=Sun
 
-  // Build cells: leading pad (so first column aligns by weekday) + all 90 days
+  // Build cells: leading pad (so first column aligns by weekday) + all days
   const cells = [];
   for (let i = 0; i < startWeekday; i++) cells.push(null);
   for (const d of days) cells.push(d);
@@ -1132,6 +1172,29 @@ function Heatmap({ days }) {
     cols.push(col);
   }
 
+  // Month label per column: first column whose first non-null cell starts a new month
+  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const colMonths = cols.map((col) => {
+    const firstCell = col.find(Boolean);
+    if (!firstCell) return null;
+    const [, m] = firstCell.date.split('-').map(Number);
+    return m - 1; // 0..11
+  });
+  const labelForCol = colMonths.map((m, i) => {
+    if (m == null) return '';
+    if (i === 0) return monthLabels[m];
+    // Show label when the month changes vs the previous labelled column
+    const prev = colMonths[i - 1];
+    return prev !== m ? monthLabels[m] : '';
+  });
+
+  // Auto-scroll to the right edge so "today" lands in view on mount.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [days]);
+
   const colorFor = (pct) => {
     if (pct == null) return 'transparent';
     if (pct === 0) return 'rgba(255,255,255,0.06)';
@@ -1145,10 +1208,14 @@ function Heatmap({ days }) {
   const dowLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="mt-4 overflow-x-auto">
-      <div className="flex gap-3">
-        {/* DoW column labels */}
-        <div className="flex flex-col gap-1 pt-1">
+    <div
+      ref={scrollerRef}
+      className="mt-4 overflow-x-auto"
+      style={{ scrollbarWidth: 'thin' }}
+    >
+      <div className="inline-flex gap-3">
+        {/* Sticky left rail: DoW labels */}
+        <div className="sticky left-0 z-10 flex flex-col gap-1 bg-[#161b22] pr-1 pt-[18px]">
           {dowLabels.map((d, i) => (
             <div
               key={d}
@@ -1160,40 +1227,50 @@ function Heatmap({ days }) {
           ))}
         </div>
 
-        {/* Heatmap grid */}
-        <div className="flex gap-1">
-          {cols.map((col, ci) => (
-            <div key={ci} className="flex flex-col gap-1">
-              {col.map((cell, ri) => {
-                if (!cell) {
+        {/* Grid: month-label row above the squares */}
+        <div className="flex flex-col">
+          {/* Month labels — one per column; only printed where the month changes */}
+          <div className="mb-1 flex gap-1 text-[9px] uppercase tracking-widest text-slate-500">
+            {labelForCol.map((label, i) => (
+              <div key={i} className="w-3.5 shrink-0">{label}</div>
+            ))}
+          </div>
+
+          {/* Heatmap grid */}
+          <div className="flex gap-1">
+            {cols.map((col, ci) => (
+              <div key={ci} className="flex flex-col gap-1">
+                {col.map((cell, ri) => {
+                  if (!cell) {
+                    return (
+                      <div
+                        key={ri}
+                        className="h-3.5 w-3.5 rounded-sm"
+                        style={{ background: 'transparent' }}
+                      />
+                    );
+                  }
+                  const isToday = cell.date === today;
                   return (
                     <div
                       key={ri}
-                      className="h-3.5 w-3.5 rounded-sm"
-                      style={{ background: 'transparent' }}
+                      title={`${cell.date} — ${cell.count}/${cell.total} habits (${Math.round(
+                        cell.pct * 100
+                      )}%)`}
+                      className={`h-3.5 w-3.5 rounded-sm transition ${
+                        isToday ? 'ring-1 ring-nebula-cyan/80' : ''
+                      }`}
+                      style={{
+                        background: colorFor(cell.pct),
+                        boxShadow:
+                          cell.pct >= 1 ? '0 0 6px rgba(56,139,253,0.8)' : undefined,
+                      }}
                     />
                   );
-                }
-                const isToday = cell.date === today;
-                return (
-                  <div
-                    key={ri}
-                    title={`${cell.date} — ${cell.count}/${cell.total} habits (${Math.round(
-                      cell.pct * 100
-                    )}%)`}
-                    className={`h-3.5 w-3.5 rounded-sm transition ${
-                      isToday ? 'ring-1 ring-nebula-cyan/80' : ''
-                    }`}
-                    style={{
-                      background: colorFor(cell.pct),
-                      boxShadow:
-                        cell.pct >= 1 ? '0 0 6px rgba(56,139,253,0.8)' : undefined,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          ))}
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

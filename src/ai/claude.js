@@ -76,11 +76,14 @@ async function geminiGenerate({
   responseMimeType,
   responseSchema,
 }) {
-  if (!isAIAvailable()) return null;
+  if (!isAIAvailable()) {
+    throw new Error('VITE_GEMINI_PROXY_URL is not set in the build');
+  }
   const token = currentAccessToken();
   if (!token) {
-    console.warn('[gemini] no valid Google OAuth token — sign in to Drive first');
-    return null;
+    throw new Error(
+      'Not signed in to Google Drive (or session expired) — sign in on Settings to enable AI'
+    );
   }
 
   const body = {
@@ -104,8 +107,9 @@ async function geminiGenerate({
     body.generationConfig.responseSchema = responseSchema;
   }
 
+  let res;
   try {
-    const res = await fetch(
+    res = await fetch(
       `${PROXY_URL}/v1beta/models/${resolveModel(model)}:generateContent`,
       {
         method: 'POST',
@@ -116,21 +120,41 @@ async function geminiGenerate({
         body: JSON.stringify(body),
       }
     );
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      console.error('[gemini] HTTP', res.status, errText);
-      return null;
-    }
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts
-      ?.map((p) => p.text || '')
-      .join('\n')
-      .trim();
-    return text || null;
   } catch (err) {
-    console.error('[gemini] call failed', err);
-    return null;
+    console.error('[gemini] network failure', err);
+    throw new Error(`Cannot reach Gemini proxy (${err.message || 'network error'})`);
   }
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    console.error('[gemini] HTTP', res.status, errText);
+    // Surface the proxy's own JSON error message when available
+    let detail = errText;
+    try {
+      const parsed = JSON.parse(errText);
+      detail = parsed.error?.message || parsed.error || parsed.message || errText;
+    } catch {
+      /* not JSON, use raw text */
+    }
+    const snippet = String(detail).slice(0, 200);
+    throw new Error(`Gemini proxy returned HTTP ${res.status}${snippet ? ` — ${snippet}` : ''}`);
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (err) {
+    throw new Error(`Gemini proxy returned malformed JSON (${err.message})`);
+  }
+  const text = data.candidates?.[0]?.content?.parts
+    ?.map((p) => p.text || '')
+    .join('\n')
+    .trim();
+  if (!text) {
+    const reason = data.candidates?.[0]?.finishReason || data.promptFeedback?.blockReason;
+    throw new Error(`Gemini returned an empty response${reason ? ` (${reason})` : ''}`);
+  }
+  return text;
 }
 
 /**
@@ -362,11 +386,20 @@ JSON: {"amount":500,"merchant":"","type":"credit","date":"2026-05-22","category"
 SMS: "Sent Rs.120 to OLA CABS via UPI on 21/05/2026. Avl Bal Rs.5,000"
 JSON: {"amount":120,"merchant":"OLA CABS","type":"debit","date":"2026-05-21","category":"transport"}`;
 
-  const out = await callClaude({
-    system: sys,
-    user: `SMS:\n${rawSMS}\n\nReturn the JSON now.`,
-    maxTokens: 300,
-  });
+  let out = null;
+  try {
+    out = await callClaude({
+      system: sys,
+      user: `SMS:\n${rawSMS}\n\nReturn the JSON now.`,
+      maxTokens: 300,
+    });
+  } catch (err) {
+    // parseUPISMS is called from a polling loop and MUST NOT throw — every
+    // failure path falls back to the regex output. Log so the console still
+    // shows what's wrong.
+    console.warn('[parseUPISMS] AI call failed, using regex fallback', err);
+    return regex;
+  }
 
   if (!out) return regex;
 
