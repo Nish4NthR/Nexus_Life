@@ -3,7 +3,7 @@ import { loadGIS } from '../utils/loadGIS.js';
 import { setTokenProvider, resetDriveCache } from '../drive/driveClient.js';
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file email';
 const STORAGE_KEY = 'nexuslife-drive-token';
 
 function loadStoredToken() {
