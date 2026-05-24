@@ -20,6 +20,8 @@
  *   "30 15 * * *" → 21:00 IST evening ping
  */
 
+const APP_URL = 'https://nexuslife.vercel.app';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
@@ -80,24 +82,53 @@ async function sendReminder(env, kind) {
 
   const keyboard = morning
     ? [
+        // Habit logging
         [{ text: '✅ All habits done', callback_data: 'habit:all' }],
+        // Mood row
         [
-          { text: '😄 Mood: amazing', callback_data: 'mood:amazing' },
-          { text: '✨ good', callback_data: 'mood:good' },
-          { text: '🌗 okay', callback_data: 'mood:okay' },
+          { text: '😄 Amazing', callback_data: 'mood:amazing' },
+          { text: '✨ Good',    callback_data: 'mood:good' },
+          { text: '🌗 Okay',   callback_data: 'mood:okay' },
+          { text: '🌧 Bad',    callback_data: 'mood:bad' },
+          { text: '💀 Terrible', callback_data: 'mood:terrible' },
         ],
-        [{ text: '📊 Open NexusLife', url: 'http://localhost:5173' }],
+        // Quick-open deep links
+        [
+          { text: '🏃 Habits',   url: `${APP_URL}/habits` },
+          { text: '🎯 Goals',    url: `${APP_URL}/goals` },
+          { text: '📚 Learning', url: `${APP_URL}/learning` },
+        ],
+        [
+          { text: '💸 Expenses', url: `${APP_URL}/expenses` },
+          { text: '📓 Journal',  url: `${APP_URL}/journal` },
+          { text: '📊 Dashboard', url: APP_URL },
+        ],
       ]
     : [
-        [{ text: '✅ Mark today complete', callback_data: 'habit:all' }],
-        [{ text: '📝 Add journal entry', callback_data: 'journal:open' }],
+        // Habit + journal
         [
-          { text: '😄 amazing', callback_data: 'mood:amazing' },
-          { text: '✨ good', callback_data: 'mood:good' },
-          { text: '🌗 okay', callback_data: 'mood:okay' },
-          { text: '🌧 bad', callback_data: 'mood:bad' },
+          { text: '✅ All habits done',  callback_data: 'habit:all' },
+          { text: '📝 Open Journal',     callback_data: 'journal:open' },
         ],
-        [{ text: '📊 Open NexusLife', url: 'http://localhost:5173' }],
+        // Full mood row
+        [
+          { text: '😄 Amazing',  callback_data: 'mood:amazing' },
+          { text: '✨ Good',     callback_data: 'mood:good' },
+          { text: '🌗 Okay',    callback_data: 'mood:okay' },
+          { text: '🌧 Bad',     callback_data: 'mood:bad' },
+          { text: '💀 Terrible', callback_data: 'mood:terrible' },
+        ],
+        // Quick-open deep links
+        [
+          { text: '🏃 Habits',   url: `${APP_URL}/habits` },
+          { text: '🎯 Goals',    url: `${APP_URL}/goals` },
+          { text: '📚 Learning', url: `${APP_URL}/learning` },
+        ],
+        [
+          { text: '💸 Expenses', url: `${APP_URL}/expenses` },
+          { text: '📓 Journal',  url: `${APP_URL}/journal` },
+          { text: '📊 Dashboard', url: APP_URL },
+        ],
       ];
 
   await tg(env, 'sendMessage', {
