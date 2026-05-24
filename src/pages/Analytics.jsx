@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ResponsiveContainer,
   LineChart,
@@ -15,6 +16,21 @@ import {
 } from 'recharts';
 import GlassCard from '../components/ui/GlassCard.jsx';
 import OrbitSpinner from '../components/ui/OrbitSpinner.jsx';
+import TimeRangeSelect from '../components/analytics/TimeRangeSelect.jsx';
+import TimeFilterPills from '../components/analytics/TimeFilterPills.jsx';
+import OverviewCards from '../components/analytics/OverviewCards.jsx';
+import PerformanceTrendChart from '../components/analytics/PerformanceTrendChart.jsx';
+import CompletionDistributionChart from '../components/analytics/CompletionDistributionChart.jsx';
+import ProductivityChart from '../components/analytics/ProductivityChart.jsx';
+import SmartInsights from '../components/analytics/SmartInsights.jsx';
+import {
+  RANGE_OPTIONS,
+  PILL_OPTIONS,
+  rangeDates,
+  readStoredRange,
+  writeStoredRange,
+} from '../utils/analyticsRanges.js';
+import { parseKey } from '../utils/dateHelpers.js';
 import {
   useHabitsStore,
   HABIT_CATEGORIES,
@@ -94,6 +110,19 @@ export default function Analytics() {
 
   const activeHabits = useMemo(() => habits.filter((h) => !h.archived), [habits]);
 
+  // ===== Range selection (persisted) =====
+  // `topRange` drives the Overview Cards, Performance Trend, Distribution
+  // and Productivity sections via the pill bar at the top of the page.
+  // `gridRange` drives the Habit Grid heatmap dropdown lower down.
+  const [topRange, setTopRange] = useState(() =>
+    readStoredRange('analytics:topRange', '30d')
+  );
+  const [gridRange, setGridRange] = useState(() =>
+    readStoredRange('analytics:gridRange', '12m')
+  );
+  useEffect(() => writeStoredRange('analytics:topRange', topRange), [topRange]);
+  useEffect(() => writeStoredRange('analytics:gridRange', gridRange), [gridRange]);
+
   // ===== Headline metrics =====
 
   const habitConsistency = useMemo(() => {
@@ -170,18 +199,290 @@ export default function Analytics() {
     return Math.max(0, ...badHabits.map(daysClean));
   }, [badHabits]);
 
-  // ===== Habit heatmap (1 year) =====
+  // ===== Habit heatmap — driven by the gridRange dropdown =====
+
+  const gridDateKeys = useMemo(
+    () => rangeDates(gridRange, allDates),
+    [gridRange, allDates]
+  );
 
   const heatmapData = useMemo(() => {
-    const days = lastNDays(365);
     const total = activeHabits.length || 1;
-    return days.map((d) => {
+    return gridDateKeys.map((d) => {
       const completedToday = new Set(
         habitLogs.filter((l) => l.date === d).map((l) => l.habitId)
       );
       const count = activeHabits.filter((h) => completedToday.has(h.id)).length;
       return { date: d, count, total, pct: count / total };
     });
+  }, [gridDateKeys, activeHabits, habitLogs]);
+
+  const gridStats = useMemo(() => {
+    const dateSet = new Set(gridDateKeys);
+    const completed = habitLogs.filter((l) => dateSet.has(l.date)).length;
+    const slots = activeHabits.length * gridDateKeys.length;
+    const completionPct = slots > 0 ? Math.round((completed / slots) * 100) : 0;
+    return {
+      completed,
+      habitsTracked: activeHabits.length,
+      completionPct,
+    };
+  }, [gridDateKeys, activeHabits, habitLogs]);
+
+  // ===== Top-range metrics (Overview cards + perf trend + distribution + productivity) =====
+
+  const topDateKeys = useMemo(
+    () => rangeDates(topRange, allDates),
+    [topRange, allDates]
+  );
+
+  const overviewMetrics = useMemo(() => {
+    const dateSet = new Set(topDateKeys);
+    const logsInRange = habitLogs.filter((l) => dateSet.has(l.date));
+    const completed = logsInRange.length;
+    const activeDays = new Set(logsInRange.map((l) => l.date)).size;
+    const totalSlots = activeHabits.length * topDateKeys.length;
+    const completionRate = totalSlots > 0
+      ? Math.round((completed / totalSlots) * 100)
+      : 0;
+    const avgDailyCompletion =
+      topDateKeys.length > 0 && activeHabits.length > 0
+        ? Math.round((completed / topDateKeys.length / activeHabits.length) * 100)
+        : 0;
+
+    const currentStreak = activeHabits.length
+      ? Math.max(
+          0,
+          ...activeHabits.map((h) =>
+            computeStreak(habitLogs.filter((l) => l.habitId === h.id).map((l) => l.date))
+          )
+        )
+      : 0;
+    const bestStreak = activeHabits.length
+      ? Math.max(
+          0,
+          ...activeHabits.map((h) =>
+            computeLongestStreak(habitLogs.filter((l) => l.habitId === h.id).map((l) => l.date))
+          )
+        )
+      : 0;
+
+    // Productivity score = average of (completion%, day-presence%, capped streak%)
+    const presence = topDateKeys.length > 0 ? (activeDays / topDateKeys.length) * 100 : 0;
+    const streakComp = Math.min(100, currentStreak * 4); // 25-day streak = 100
+    const productivityScore = Math.round((completionRate + presence + streakComp) / 3);
+
+    return {
+      totalHabits: activeHabits.length,
+      completed,
+      currentStreak,
+      bestStreak,
+      completionRate,
+      activeDays,
+      productivityScore,
+      avgDailyCompletion,
+    };
+  }, [topDateKeys, activeHabits, habitLogs]);
+
+  // Performance trend: bucket the range into ≤60 points; daily if range is short.
+  const perfTrendData = useMemo(() => {
+    if (topDateKeys.length === 0 || activeHabits.length === 0) return [];
+    const bucketSize = topDateKeys.length > 90 ? 7 : 1;
+    const total = activeHabits.length;
+    const out = [];
+    for (let i = 0; i < topDateKeys.length; i += bucketSize) {
+      const slice = topDateKeys.slice(i, i + bucketSize);
+      let done = 0;
+      let activeDays = 0;
+      for (const d of slice) {
+        const dayLogs = habitLogs.filter((l) => l.date === d).length;
+        done += dayLogs;
+        if (dayLogs > 0) activeDays++;
+      }
+      const slots = total * slice.length;
+      const completion = slots > 0 ? (done / slots) * 100 : 0;
+      const consistency = (activeDays / slice.length) * 100;
+      const productivity = (completion + consistency) / 2;
+      out.push({
+        label: shortLabel(slice[Math.floor(slice.length / 2)]),
+        completion: Math.round(completion),
+        consistency: Math.round(consistency),
+        productivity: Math.round(productivity),
+      });
+    }
+    return out;
+  }, [topDateKeys, activeHabits, habitLogs]);
+
+  // Distribution: bucket each active habit by its lifetime completion rate.
+  const distributionData = useMemo(() => {
+    const buckets = Array.from({ length: 10 }, (_, i) => ({
+      bucket: `${i * 10}-${(i + 1) * 10}%`,
+      count: 0,
+      percent: 0,
+    }));
+    if (activeHabits.length === 0) return buckets;
+
+    for (const h of activeHabits) {
+      const dates = habitLogs.filter((l) => l.habitId === h.id).map((l) => l.date);
+      if (dates.length === 0) {
+        buckets[0].count++;
+        continue;
+      }
+      const sorted = [...new Set(dates)].sort();
+      const first = parseKey(sorted[0]);
+      const daysSpan = Math.max(
+        1,
+        Math.round((Date.now() - first.getTime()) / 86400000) + 1
+      );
+      const rate = (dates.length / daysSpan) * 100;
+      const idx = Math.min(9, Math.floor(rate / 10));
+      buckets[idx].count++;
+    }
+    for (const b of buckets) {
+      b.percent = Math.round((b.count / activeHabits.length) * 100);
+    }
+    return buckets;
+  }, [activeHabits, habitLogs]);
+
+  // Productivity combined chart: study minutes (bars) + completion% (line).
+  const productivityChartData = useMemo(() => {
+    if (topDateKeys.length === 0) return [];
+    const total = activeHabits.length || 1;
+    const bucketSize = topDateKeys.length > 90 ? 7 : 1;
+    const out = [];
+    for (let i = 0; i < topDateKeys.length; i += bucketSize) {
+      const slice = topDateKeys.slice(i, i + bucketSize);
+      let studyMin = 0;
+      let habitsDone = 0;
+      let activeDays = 0;
+      for (const d of slice) {
+        studyMin += learningLogs
+          .filter((l) => l.date === d)
+          .reduce((s, l) => s + l.minutes, 0);
+        const dayHabits = habitLogs.filter((l) => l.date === d).length;
+        habitsDone += dayHabits;
+        if (dayHabits > 0) activeDays++;
+      }
+      const slots = total * slice.length;
+      const completion = slots > 0 ? (habitsDone / slots) * 100 : 0;
+      const consistency = (activeDays / slice.length) * 100;
+      out.push({
+        label: shortLabel(slice[Math.floor(slice.length / 2)]),
+        studyMin,
+        habitsDone,
+        total: total * slice.length,
+        completion: Math.round(completion),
+        consistency: Math.round(consistency),
+      });
+    }
+    return out;
+  }, [topDateKeys, activeHabits, habitLogs, learningLogs]);
+
+  // Smart insights — generated, not AI.
+  const smartInsights = useMemo(() => {
+    const out = [];
+    if (activeHabits.length === 0 || habitLogs.length === 0) return out;
+
+    // Best day-of-week (across all-time logs)
+    const dayCounts = [0, 0, 0, 0, 0, 0, 0];
+    for (const l of habitLogs) {
+      const [y, m, d] = l.date.split('-').map(Number);
+      dayCounts[new Date(y, m - 1, d).getDay()]++;
+    }
+    const maxIdx = dayCounts.indexOf(Math.max(...dayCounts));
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    if (dayCounts[maxIdx] > 0) {
+      out.push({
+        icon: '⭐',
+        label: 'Best performance day',
+        value: dayNames[maxIdx],
+        tone: 'up',
+      });
+    }
+
+    // Most consistent habit (highest historical streak)
+    const ranked = activeHabits
+      .map((h) => {
+        const dates = habitLogs.filter((l) => l.habitId === h.id).map((l) => l.date);
+        return {
+          name: h.name,
+          longest: computeLongestStreak(dates),
+        };
+      })
+      .sort((a, b) => b.longest - a.longest);
+    if (ranked[0]?.longest > 0) {
+      out.push({
+        icon: '⚡',
+        label: 'Most consistent habit',
+        value: `${ranked[0].name} · ${ranked[0].longest}d best`,
+        tone: 'up',
+      });
+    }
+
+    // Current top streak
+    const topStreak = Math.max(
+      0,
+      ...activeHabits.map((h) =>
+        computeStreak(habitLogs.filter((l) => l.habitId === h.id).map((l) => l.date))
+      )
+    );
+    if (topStreak > 0) {
+      out.push({
+        icon: '🔥',
+        label: 'Active streak',
+        value: `${topStreak} day${topStreak === 1 ? '' : 's'} running`,
+        tone: 'up',
+      });
+    }
+
+    // WoW productivity delta
+    const completionFor = (days) => {
+      if (activeHabits.length === 0) return 0;
+      const set = new Set(days);
+      const done = habitLogs.filter((l) => set.has(l.date)).length;
+      const slots = activeHabits.length * days.length;
+      return slots > 0 ? Math.round((done / slots) * 100) : 0;
+    };
+    const tw = completionFor(lastNDays(7));
+    const allLast14 = lastNDays(14);
+    const lw = completionFor(allLast14.slice(0, 7));
+    if (tw !== lw) {
+      const delta = tw - lw;
+      out.push({
+        icon: delta > 0 ? '📈' : '📉',
+        label: 'Productivity vs last week',
+        value: `${delta > 0 ? '+' : ''}${delta}%`,
+        tone: delta > 0 ? 'up' : 'down',
+      });
+    }
+
+    // Suggested focus: a habit with no logs in the last 7 days
+    const recent = new Set(lastNDays(7));
+    const inactive = activeHabits.find((h) => {
+      const dates = habitLogs.filter((l) => l.habitId === h.id).map((l) => l.date);
+      return !dates.some((d) => recent.has(d));
+    });
+    if (inactive) {
+      out.push({
+        icon: '💡',
+        label: 'Suggested focus',
+        value: `Restart "${inactive.name}" — no logs this week`,
+        tone: 'neutral',
+      });
+    }
+
+    // Streak vs longest comparison — surface progress
+    if (topStreak > 0 && ranked[0]?.longest > topStreak) {
+      const togo = ranked[0].longest - topStreak;
+      out.push({
+        icon: '🎯',
+        label: 'To beat your record',
+        value: `${togo} more day${togo === 1 ? '' : 's'}`,
+        tone: 'neutral',
+      });
+    }
+
+    return out;
   }, [activeHabits, habitLogs]);
 
   // ===== Week-over-week deltas =====
@@ -445,6 +746,81 @@ export default function Analytics() {
         </p>
       </div>
 
+      {/* ===== Top range filter ===== */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-mono text-sm uppercase tracking-[0.3em] text-slate-400">
+          Overview
+        </h2>
+        <TimeFilterPills
+          value={topRange}
+          onChange={setTopRange}
+          options={PILL_OPTIONS}
+        />
+      </div>
+
+      {/* ===== Overview cards ===== */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`overview-${topRange}`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="mt-4"
+        >
+          <OverviewCards {...overviewMetrics} />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* ===== Performance trend ===== */}
+      <div className="mt-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`perf-${topRange}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            <PerformanceTrendChart data={perfTrendData} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* ===== Distribution + Productivity (side-by-side) ===== */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`dist-${topRange}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            <CompletionDistributionChart
+              data={distributionData}
+              totalHabits={overviewMetrics.totalHabits}
+            />
+          </motion.div>
+        </AnimatePresence>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`prod-${topRange}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            <ProductivityChart data={productivityChartData} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* ===== Smart insights ===== */}
+      <div className="mt-8">
+        <SmartInsights insights={smartInsights} />
+      </div>
+
       {/* ===== Hero banner ===== */}
       <GlassCard
         hover={false}
@@ -560,28 +936,61 @@ export default function Analytics() {
         />
       </div>
 
-      {/* ===== Habit heatmap (1 year) ===== */}
+      {/* ===== Habit grid (range-filtered) ===== */}
       <GlassCard hover={false} className="mt-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
-            Habit grid · 1 year
-          </h2>
-          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-500">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-4">
+            <TimeRangeSelect
+              value={gridRange}
+              onChange={setGridRange}
+              options={RANGE_OPTIONS}
+            />
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[12px] text-slate-400">
+              <span>
+                <span className="text-nebula-violet">{gridStats.completed.toLocaleString()}</span>{' '}
+                completed
+              </span>
+              <span>
+                <span className="text-nebula-cyan">{gridStats.habitsTracked}</span>{' '}
+                habits tracked
+              </span>
+              <span>
+                <span className="text-nebula-violet">{gridStats.completionPct}%</span>{' '}
+                completion
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-slate-500">
             <span>Less</span>
             <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.06)' }} />
             <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.30)' }} />
             <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.55)' }} />
             <span className="h-3 w-3 rounded-sm" style={{ background: 'rgba(57,255,20,0.85)' }} />
-            <span className="h-3 w-3 rounded-sm" style={{ background: '#39ff14', boxShadow: '0 0 6px #39ff14aa' }} />
+            <span
+              className="h-3 w-3 rounded-sm"
+              style={{ background: '#39ff14', boxShadow: '0 0 6px #39ff14aa' }}
+            />
             <span>More</span>
           </div>
         </div>
+
         {activeHabits.length === 0 ? (
-          <div className="mt-4 text-sm text-slate-500">
+          <div className="mt-4 font-mono text-sm text-slate-500">
             Add a few habits on the Habits page — this grid will fill in as you log.
           </div>
         ) : (
-          <Heatmap days={heatmapData} />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`grid-${gridRange}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
+              <Heatmap days={heatmapData} />
+            </motion.div>
+          </AnimatePresence>
         )}
       </GlassCard>
 
