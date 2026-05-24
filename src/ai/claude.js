@@ -1,199 +1,137 @@
 /**
- * AI client for NexusLife — calls the gemini-proxy Cloudflare Worker so the
- * Gemini API key stays server-side. The proxy verifies the caller's Google
- * OAuth access token (same one used for Drive) belongs to the allowed email
- * before forwarding to Gemini — safe to ship in a public bundle.
+ * AI client for NexusLife — calls the nexuslife-gemini-proxy Cloudflare Worker
+ * which forwards requests to OpenRouter so the API key stays server-side.
+ * Auth: X-Client-Secret header (shared secret baked into the Vercel build).
  *
- * Function names still start with `callClaude` for backwards compatibility
- * with all the feature helpers and external imports — only the implementation
- * underneath changed.
- *
- * All helpers return either a string/object or `null` on failure. They never
- * throw — UI code can safely render fallbacks.
+ * Function names keep the `callClaude` prefix for backwards compatibility.
+ * All helpers return a string/object or null — they never throw.
  */
 
-import { useDriveAuthStore } from '../store/useDriveAuthStore.js';
 
 const PROXY_URL = import.meta.env.VITE_GEMINI_PROXY_URL;
 const PROXY_SECRET = import.meta.env.VITE_GEMINI_PROXY_SECRET;
+// Default free model on OpenRouter — override with VITE_GEMINI_MODEL env var
 const DEFAULT_MODEL =
-  import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash-lite';
-const HEAVY_MODEL = 'gemini-2.5-flash';
+  import.meta.env.VITE_GEMINI_MODEL || 'google/gemini-2.0-flash-exp:free';
+const HEAVY_MODEL = 'google/gemini-2.5-flash-preview-05-20:free';
 
 export function isAIAvailable() {
   return Boolean(PROXY_URL) && PROXY_URL.startsWith('http') && Boolean(PROXY_SECRET);
 }
 
-function currentAccessToken() {
-  const t = useDriveAuthStore.getState().token;
-  if (!t || !t.accessToken) return null;
-  if (Date.now() >= t.expiresAt) return null;
-  return t.accessToken;
-}
-
-/**
- * Translate a JSON-Schema-style object to Gemini's responseSchema format.
- * Gemini uses uppercase OpenAPI types and a subset of JSON Schema fields.
- */
-function toGeminiSchema(schema) {
-  if (!schema || typeof schema !== 'object') return schema;
-  const out = {};
-  if (schema.type) {
-    out.type =
-      typeof schema.type === 'string' ? schema.type.toUpperCase() : schema.type;
-  }
-  if (schema.description) out.description = schema.description;
-  if (schema.enum) out.enum = schema.enum;
-  if (schema.properties) {
-    out.properties = {};
-    for (const [k, v] of Object.entries(schema.properties)) {
-      out.properties[k] = toGeminiSchema(v);
-    }
-  }
-  if (schema.items) out.items = toGeminiSchema(schema.items);
-  if (schema.required) out.required = schema.required;
-  // Skip additionalProperties / minItems / maxItems — Gemini ignores or rejects them
-  return out;
-}
-
-/**
- * Translate Claude-style model names (kept around in case any caller still
- * passes one) to a sensible Gemini equivalent.
- */
 function resolveModel(name) {
   if (!name) return DEFAULT_MODEL;
-  if (name.startsWith('gemini-')) return name;
-  // Anthropic naming → Gemini equivalent
+  // Pass through any OpenRouter model ID directly
+  if (name.includes('/')) return name;
+  // Legacy Gemini names → free OpenRouter equivalents
+  if (name.includes('gemini-2.5-flash')) return 'google/gemini-2.5-flash-preview-05-20:free';
+  if (name.includes('gemini')) return 'google/gemini-2.0-flash-exp:free';
+  // Legacy Anthropic names
   if (name.includes('opus')) return HEAVY_MODEL;
-  if (name.includes('haiku')) return 'gemini-2.5-flash-lite';
+  if (name.includes('haiku')) return 'google/gemini-2.0-flash-exp:free';
   return DEFAULT_MODEL;
 }
 
-async function geminiGenerate({
-  system,
-  user,
-  model,
-  maxTokens = 1024,
-  responseMimeType,
-  responseSchema,
-}) {
+/**
+ * Core generate — calls OpenRouter via the proxy using OpenAI chat format.
+ */
+async function orGenerate({ system, user, model, maxTokens = 1024, jsonMode = false }) {
   if (!isAIAvailable()) {
-    throw new Error('VITE_GEMINI_PROXY_URL is not set in the build');
+    throw new Error('VITE_GEMINI_PROXY_URL / VITE_GEMINI_PROXY_SECRET not set in build');
   }
-  const token = currentAccessToken(); // still used for Drive, not for auth here
-  void token; // suppress unused warning
+
+  const messages = [];
+  if (system) messages.push({ role: 'system', content: system });
+  messages.push({ role: 'user', content: typeof user === 'string' ? user : String(user) });
 
   const body = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: typeof user === 'string' ? user : String(user) }],
-      },
-    ],
-    generationConfig: {
-      maxOutputTokens: maxTokens,
-    },
+    model: resolveModel(model),
+    messages,
+    max_tokens: maxTokens,
   };
-  if (system) {
-    body.systemInstruction = { parts: [{ text: system }] };
-  }
-  if (responseMimeType) {
-    body.generationConfig.responseMimeType = responseMimeType;
-  }
-  if (responseSchema) {
-    body.generationConfig.responseSchema = responseSchema;
+  if (jsonMode) {
+    body.response_format = { type: 'json_object' };
   }
 
   let res;
   try {
-    res = await fetch(
-      `${PROXY_URL}/v1beta/models/${resolveModel(model)}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Client-Secret': PROXY_SECRET,
-        },
-        body: JSON.stringify(body),
-      }
-    );
+    res = await fetch(`${PROXY_URL}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Client-Secret': PROXY_SECRET,
+      },
+      body: JSON.stringify(body),
+    });
   } catch (err) {
-    console.error('[gemini] network failure', err);
-    throw new Error(`Cannot reach Gemini proxy (${err.message || 'network error'})`);
+    console.error('[ai] network failure', err);
+    throw new Error(`Cannot reach AI proxy (${err.message || 'network error'})`);
   }
 
   if (!res.ok) {
     const errText = await res.text().catch(() => '');
-    console.error('[gemini] HTTP', res.status, errText);
-    // Surface the proxy's own JSON error message when available
+    console.error('[ai] HTTP', res.status, errText);
     let detail = errText;
     try {
       const parsed = JSON.parse(errText);
       detail = parsed.error?.message || parsed.error || parsed.message || errText;
-    } catch {
-      /* not JSON, use raw text */
-    }
-    const snippet = String(detail).slice(0, 200);
-    throw new Error(`Gemini proxy returned HTTP ${res.status}${snippet ? ` — ${snippet}` : ''}`);
+    } catch { /* not JSON */ }
+    throw new Error(`AI proxy returned HTTP ${res.status}${detail ? ` — ${String(detail).slice(0, 200)}` : ''}`);
   }
 
   let data;
-  try {
-    data = await res.json();
-  } catch (err) {
-    throw new Error(`Gemini proxy returned malformed JSON (${err.message})`);
+  try { data = await res.json(); } catch (err) {
+    throw new Error(`AI proxy returned malformed JSON (${err.message})`);
   }
-  const text = data.candidates?.[0]?.content?.parts
-    ?.map((p) => p.text || '')
-    .join('\n')
-    .trim();
-  if (!text) {
-    const reason = data.candidates?.[0]?.finishReason || data.promptFeedback?.blockReason;
-    throw new Error(`Gemini returned an empty response${reason ? ` (${reason})` : ''}`);
+
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) {
+    const reason = data.choices?.[0]?.finish_reason;
+    throw new Error(`AI returned an empty response${reason ? ` (${reason})` : ''}`);
   }
-  return text;
+  return content;
 }
 
 /**
- * Low-level call. Returns the response text or null.
- * Signature preserved from the Claude version — `thinking` and `outputConfig`
- * params are accepted but ignored (Gemini handles reasoning internally).
+ * Low-level text call. Signature preserved for backwards compatibility.
  */
 export async function callClaude({
-  system,
-  user,
-  model,
-  maxTokens = 1024,
+  system, user, model, maxTokens = 1024,
   // eslint-disable-next-line no-unused-vars
   thinking = false,
   // eslint-disable-next-line no-unused-vars
   outputConfig,
 }) {
-  return geminiGenerate({ system, user, model, maxTokens });
+  return orGenerate({ system, user, model, maxTokens });
 }
 
 /**
- * Call the model with a JSON schema for structured outputs. Returns the parsed
- * object or null on failure. Uses Gemini's responseMimeType + responseSchema.
+ * Structured JSON call — instructs the model to return JSON and parses it.
  */
 export async function callClaudeJSON({ system, user, schema, model, maxTokens }) {
-  const text = await geminiGenerate({
-    system,
+  // Append schema description to system prompt so any model can follow it
+  const schemaHint = schema
+    ? `\n\nRespond with ONLY valid minified JSON matching this schema:\n${JSON.stringify(schema, null, 2)}`
+    : '';
+  const augmentedSystem = (system || '') + schemaHint;
+
+  const raw = await orGenerate({
+    system: augmentedSystem,
     user,
     model,
     maxTokens: maxTokens || 1024,
-    responseMimeType: 'application/json',
-    responseSchema: schema ? toGeminiSchema(schema) : undefined,
+    jsonMode: true,
   });
-  if (!text) return null;
+  if (!raw) return null;
   try {
-    const cleaned = text
-      .replace(/^```(?:json)?/i, '')
-      .replace(/```$/i, '')
-      .trim();
-    return JSON.parse(cleaned);
+    const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    return firstBrace >= 0 && lastBrace > firstBrace
+      ? JSON.parse(cleaned.slice(firstBrace, lastBrace + 1))
+      : JSON.parse(cleaned);
   } catch (err) {
-    console.warn('[gemini] JSON parse failed', err, text);
+    console.warn('[ai] JSON parse failed', err, raw);
     return null;
   }
 }

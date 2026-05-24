@@ -1,26 +1,30 @@
 /**
- * gemini-proxy — Cloudflare Worker (free tier).
+ * nexuslife-gemini-proxy — Cloudflare Worker (free tier).
  *
- * Forwards Gemini API calls so the API key stays server-side.
- * Auth: frontend sends a shared secret in the X-Client-Secret header.
+ * Proxies requests to OpenRouter so the API key stays server-side.
+ * Auth: frontend sends CLIENT_SECRET in the X-Client-Secret header.
  *
- * Endpoints:
- *   POST /v1beta/models/<model>:generateContent
+ * Endpoint:
+ *   POST /v1/chat/completions
  *     Headers: X-Client-Secret: <CLIENT_SECRET>
- *     Body:    raw Gemini generateContent body (passed through unchanged)
- *     Returns: Gemini response unchanged
+ *     Body:    OpenAI-compatible chat completions body
+ *     Returns: OpenAI-compatible response
  *
  *   GET  /healthz  — liveness, no auth
  *
  * Secrets (set via `wrangler secret put`):
- *   GEMINI_API_KEY   — your AI Studio key
- *   CLIENT_SECRET    — a long random hex string the frontend sends
+ *   OPENROUTER_API_KEY  — your OpenRouter key (sk-or-v1-...)
+ *   CLIENT_SECRET       — long random hex the frontend sends
  */
+
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+const SITE_URL = 'https://nexuslife.vercel.app';
+const SITE_NAME = 'NexusLife';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Secret',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Client-Secret',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -41,7 +45,7 @@ const text = (str, status = 200) =>
   });
 
 function checkSecret(request, env) {
-  if (!env.CLIENT_SECRET) return false; // secret not set → deny all
+  if (!env.CLIENT_SECRET) return false;
   const provided =
     request.headers.get('X-Client-Secret') ||
     new URL(request.url).searchParams.get('secret');
@@ -60,43 +64,38 @@ export default {
       return text('ok');
     }
 
-    // Match Gemini-style path:  /v1beta/models/<model>:generateContent
-    const m = url.pathname.match(/^\/v1beta\/models\/([\w.-]+):generateContent$/);
-    if (request.method === 'POST' && m) {
-      const model = m[1];
-
+    if (request.method === 'POST' && url.pathname === '/v1/chat/completions') {
       if (!checkSecret(request, env)) {
         return json({ error: 'forbidden — invalid client secret' }, { status: 403 });
       }
 
-      if (!env.GEMINI_API_KEY) {
-        return json({ error: 'GEMINI_API_KEY not configured on the proxy' }, { status: 500 });
+      if (!env.OPENROUTER_API_KEY) {
+        return json({ error: 'OPENROUTER_API_KEY not configured' }, { status: 500 });
       }
 
       const body = await request.text();
-      const upstreamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        model
-      )}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
 
       let upstream;
       try {
-        upstream = await fetch(upstreamUrl, {
+        upstream = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${env.OPENROUTER_API_KEY}`,
+            'HTTP-Referer': SITE_URL,
+            'X-Title': SITE_NAME,
+          },
           body,
         });
       } catch (err) {
         console.error('[gemini-proxy] upstream fetch failed', err);
-        return json({ error: 'upstream fetch failed' }, { status: 502 });
+        return json({ error: `upstream fetch failed: ${err.message}` }, { status: 502 });
       }
 
       const respBody = await upstream.text();
       return new Response(respBody, {
         status: upstream.status,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
