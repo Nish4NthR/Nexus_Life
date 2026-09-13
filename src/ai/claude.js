@@ -1,7 +1,7 @@
 /**
  * AI client for NexusLife — calls the nexuslife-gemini-proxy Cloudflare Worker
  * which forwards requests to OpenRouter so the API key stays server-side.
- * Auth: X-Client-Secret header (shared secret baked into the Vercel build).
+ * Auth: Supabase session bearer token. The upstream API key stays server-side.
  *
  * Function names keep the `callClaude` prefix for backwards compatibility.
  * All helpers return a string/object or null — they never throw.
@@ -9,14 +9,14 @@
 
 
 const PROXY_URL = import.meta.env.VITE_GEMINI_PROXY_URL;
-const PROXY_SECRET = import.meta.env.VITE_GEMINI_PROXY_SECRET;
+import { supabase } from '../lib/supabase.js';
 // Default free model on OpenRouter — override with VITE_GEMINI_MODEL env var
 const DEFAULT_MODEL =
   import.meta.env.VITE_GEMINI_MODEL || 'google/gemini-2.0-flash-exp:free';
 const HEAVY_MODEL = 'google/gemini-2.5-flash-preview-05-20:free';
 
 export function isAIAvailable() {
-  return Boolean(PROXY_URL) && PROXY_URL.startsWith('http') && Boolean(PROXY_SECRET);
+  return Boolean(PROXY_URL) && PROXY_URL.startsWith('http') && Boolean(supabase);
 }
 
 function resolveModel(name) {
@@ -37,7 +37,7 @@ function resolveModel(name) {
  */
 async function orGenerate({ system, user, model, maxTokens = 1024, jsonMode = false }) {
   if (!isAIAvailable()) {
-    throw new Error('VITE_GEMINI_PROXY_URL / VITE_GEMINI_PROXY_SECRET not set in build');
+    throw new Error('AI proxy or Supabase authentication is not configured');
   }
 
   const messages = [];
@@ -53,13 +53,15 @@ async function orGenerate({ system, user, model, maxTokens = 1024, jsonMode = fa
     body.response_format = { type: 'json_object' };
   }
 
+  const { data: { session } = {} } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Sign in again before using AI features');
   let res;
   try {
     res = await fetch(`${PROXY_URL}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Client-Secret': PROXY_SECRET,
+        Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify(body),
     });

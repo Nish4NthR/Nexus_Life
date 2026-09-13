@@ -2,10 +2,9 @@ import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/useAuthStore.js';
-import { useDriveAuthStore } from '../../store/useDriveAuthStore.js';
 
 const NAV = [
-  { to: '/',           label: 'dashboard'  },
+  { to: '/dashboard',  label: 'dashboard'  },
   { to: '/habits',     label: 'habits'     },
   { to: '/bad-habits', label: 'bad habits' },
   { to: '/expenses',   label: 'expenses'   },
@@ -17,13 +16,11 @@ const NAV = [
 ];
 
 export default function Navbar() {
-  const username = useAuthStore((s) => s.username) || 'operator';
+  const username = useAuthStore((s) => s.user?.user_metadata?.full_name || s.user?.email || 'operator');
   const logout = useAuthStore((s) => s.logout);
-  const signOutDrive = useDriveAuthStore((s) => s.signOut);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
-    signOutDrive();
     logout();
   };
 

@@ -1,0 +1,4 @@
+id,user_id,goal_id,title,completed,completed_at
+aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa,TEST_USER_A_UUID,99999999-9999-4999-8999-999999999999,Complete first project,false,
+bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb,TEST_USER_A_UUID,99999999-9999-4999-8999-999999999999,Publish portfolio site,false,
+

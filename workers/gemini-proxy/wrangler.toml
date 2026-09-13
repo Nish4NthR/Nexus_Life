@@ -2,6 +2,9 @@ name = "nexuslife-gemini-proxy"
 main = "src/index.js"
 compatibility_date = "2025-12-01"
 
+# Public Supabase project values used to validate bearer sessions.
+# Configure these as Worker vars: SUPABASE_URL and SUPABASE_ANON_KEY.
+
 # Secrets — set via `wrangler secret put`, NEVER in this file:
 #   GEMINI_API_KEY   — your AI Studio key
 #   CLIENT_SECRET    — long random hex (openssl rand -hex 32); frontend sends this

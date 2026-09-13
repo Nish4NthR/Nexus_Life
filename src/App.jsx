@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login.jsx';
+import Landing from './pages/Landing.jsx';
+import AuthForm from './pages/AuthForm.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Habits from './pages/Habits.jsx';
 import BadHabits from './pages/BadHabits.jsx';
@@ -13,31 +15,19 @@ import ProtectedRoute from './components/layout/ProtectedRoute.jsx';
 import AppLayout from './components/layout/AppLayout.jsx';
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-
-        <Route
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/habits" element={<Habits />} />
-          <Route path="/bad-habits" element={<BadHabits />} />
-          <Route path="/expenses" element={<Expenses />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/learning" element={<Learning />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <BrowserRouter><Routes>
+    <Route path="/" element={<Landing />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<AuthForm mode="signup" />} />
+    <Route path="/forgot-password" element={<AuthForm mode="forgot" />} />
+    <Route path="/reset-password" element={<AuthForm mode="reset" />} />
+    <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/habits" element={<Habits />} /><Route path="/bad-habits" element={<BadHabits />} />
+      <Route path="/expenses" element={<Expenses />} /><Route path="/goals" element={<Goals />} />
+      <Route path="/learning" element={<Learning />} /><Route path="/analytics" element={<Analytics />} />
+      <Route path="/journal" element={<Journal />} /><Route path="/settings" element={<Settings />} />
+    </Route>
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes></BrowserRouter>;
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import GlassCard from '../components/ui/GlassCard.jsx';
 import { useAuthStore } from '../store/useAuthStore.js';
-import { useDriveAuthStore } from '../store/useDriveAuthStore.js';
 import { useHabitsStore } from '../store/useHabitsStore.js';
 import { useExpensesStore } from '../store/useExpensesStore.js';
 import { useGoalsStore } from '../store/useGoalsStore.js';
@@ -13,9 +12,8 @@ import { isAIAvailable } from '../ai/claude.js';
 const UPI_WORKER_URL = import.meta.env.VITE_UPI_API_URL;
 
 export default function Settings() {
-  const username = useAuthStore((s) => s.username) || 'Operator';
+  const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
-  const driveSignOut = useDriveAuthStore((s) => s.signOut);
 
   const habitsLoad = useHabitsStore((s) => s.load);
   const expensesLoad = useExpensesStore((s) => s.load);
@@ -38,7 +36,6 @@ export default function Settings() {
   const [syncing, setSyncing] = useState(false);
 
   const fullLogout = () => {
-    driveSignOut();
     logout();
   };
 
@@ -61,7 +58,7 @@ export default function Settings() {
   const exportAll = () => {
     const payload = {
       exportedAt: new Date().toISOString(),
-      user: username,
+      user: user?.email || null,
       habits,
       habitLogs,
       expenses,
@@ -79,7 +76,7 @@ export default function Settings() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nexuslife-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `NexusLife_Backup_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -115,7 +112,8 @@ export default function Settings() {
             Profile
           </h2>
           <div className="mt-4 space-y-3">
-            <Row label="Operator" value={username} />
+            <Row label="Operator" value={user?.user_metadata?.full_name || user?.email || 'Operator'} />
+            <Row label="Authentication" value={user?.app_metadata?.provider || 'email'} hint="Managed by Supabase Auth." />
             <Row
               label="Storage"
               value="Google Drive — NexusLife folder"
@@ -124,7 +122,7 @@ export default function Settings() {
             <Row
               label="AI"
               value={isAIAvailable() ? 'Connected (Gemini 2.5 Flash-Lite)' : 'Not configured'}
-              hint={!isAIAvailable() ? 'Set VITE_GEMINI_API_KEY in .env to enable AI features.' : 'Daily quote/reflection cached locally to preserve quota.'}
+              hint={!isAIAvailable() ? 'Configure the secure AI proxy and Supabase session to enable AI features.' : 'Daily quote/reflection cached locally to preserve quota.'}
             />
             <Row
               label="Theme"

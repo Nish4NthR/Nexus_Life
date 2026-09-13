@@ -1,0 +1,4 @@
+id,user_id,amount,currency,category,merchant,note,date,source
+55555555-5555-4555-8555-555555555555,TEST_USER_A_UUID,250,INR,food,Campus Cafe,Lunch,2026-09-12,manual
+66666666-6666-4666-8666-666666666666,TEST_USER_A_UUID,99,INR,education,Online Course,React course,2026-09-11,manual
+

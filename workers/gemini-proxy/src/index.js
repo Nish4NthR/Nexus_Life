@@ -2,7 +2,7 @@
  * nexuslife-gemini-proxy — Cloudflare Worker (free tier).
  *
  * Proxies requests to OpenRouter so the API key stays server-side.
- * Auth: frontend sends CLIENT_SECRET in the X-Client-Secret header.
+ * Auth: frontend sends a Supabase access token. The upstream API key remains server-side.
  *
  * Endpoint:
  *   POST /v1/chat/completions
@@ -24,7 +24,7 @@ const SITE_NAME = 'NexusLife';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Client-Secret',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -44,12 +44,11 @@ const text = (str, status = 200) =>
     headers: { 'Content-Type': 'text/plain', ...corsHeaders },
   });
 
-function checkSecret(request, env) {
-  if (!env.CLIENT_SECRET) return false;
-  const provided =
-    request.headers.get('X-Client-Secret') ||
-    new URL(request.url).searchParams.get('secret');
-  return provided === env.CLIENT_SECRET;
+async function authenticated(request, env) {
+  const authorization = request.headers.get('Authorization');
+  if (!authorization?.startsWith('Bearer ') || !env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) return false;
+  const response = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, { headers: { Authorization: authorization, apikey: env.SUPABASE_ANON_KEY } });
+  return response.ok;
 }
 
 export default {
@@ -65,7 +64,7 @@ export default {
     }
 
     if (request.method === 'POST' && url.pathname === '/v1/chat/completions') {
-      if (!checkSecret(request, env)) {
+      if (!(await authenticated(request, env))) {
         return json({ error: 'forbidden — invalid client secret' }, { status: 403 });
       }
 

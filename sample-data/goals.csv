@@ -1,0 +1,3 @@
+id,user_id,title,description,category,target_date,status
+99999999-9999-4999-8999-999999999999,TEST_USER_A_UUID,Build portfolio,Finish three portfolio projects,career,2026-12-31,active
+
