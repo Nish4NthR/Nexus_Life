@@ -169,7 +169,7 @@ export default function Learning() {
               <div className="mt-1 text-sm text-slate-400">
                 {nextMission.available
                   ? 'Tap ↻ for an AI pick of what to study next.'
-                  : 'AI not configured — add VITE_GEMINI_API_KEY.'}
+                  : 'AI is not configured or you are not signed in.'}
               </div>
             )}
           </div>

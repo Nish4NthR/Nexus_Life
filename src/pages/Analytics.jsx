@@ -1351,7 +1351,7 @@ export default function Analytics() {
             <div className="text-sm text-slate-500">
               {summary.available
                 ? 'Tap "Generate" for a personalized recap of habits, expenses, goals, learning, and mood across the last 7 days.'
-                : 'AI not configured — VITE_GEMINI_PROXY_URL is missing from this build.'}
+                : 'AI is not configured or you are not signed in.'}
             </div>
           )}
           {summary.error && (

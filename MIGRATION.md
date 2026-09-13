@@ -54,3 +54,15 @@ The existing data files in Google Drive are not deleted. A dedicated import tool
 - Add a server-side account deletion function using the Supabase service role.
 - Move UPI and Telegram calls behind authenticated server/Edge Functions; their current legacy workers still use browser-visible shared secrets.
 - Add automated two-user RLS tests and a Drive backup/restore UI.
+
+## Vercel Gemini AI
+
+The browser calls `/api/gemini` with the current Supabase bearer session. The Vercel function validates that session and reads the secret `GEMINI_API_KEY` only from the Vercel server environment before calling Gemini. Set these Vercel variables:
+
+```text
+GEMINI_API_KEY=server-only-Gemini-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+There are no `VITE_GEMINI_*` variables. The old Cloudflare/OpenRouter worker was removed because Vercel is now the single AI proxy.

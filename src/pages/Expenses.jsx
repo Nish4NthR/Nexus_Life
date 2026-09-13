@@ -235,7 +235,7 @@ export default function Expenses() {
                   insights.error ||
                   (insights.available
                     ? 'Tap "Analyze week" to get 2-3 saving tips based on your last 7 days.'
-                    : 'AI not configured — add VITE_GEMINI_API_KEY to .env.')}
+                    : 'AI is not configured or you are not signed in.')}
               </div>
             </GlassCard>
 

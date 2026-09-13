@@ -53,7 +53,7 @@ export function useAI(fn, { auto = false, initialArgs, cacheKey } = {}) {
   const run = useCallback(
     async (args) => {
       if (!isAIAvailable()) {
-        setError('AI not configured — VITE_GEMINI_PROXY_URL is missing from this build');
+        setError('AI is not configured or you are not signed in.');
         return null;
       }
       if (inFlight.current) return null;
