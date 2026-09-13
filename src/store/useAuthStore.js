@@ -50,7 +50,8 @@ export const useAuthStore = create((set, get) => ({
 
   updatePassword: async (password) => {
     const { error } = await requireSupabase().auth.updateUser({ password });
-    if (error) set({ error: friendlyAuthError(error) }); return { error };
+    if (error) { const message = friendlyAuthError(error); set({ error: message }); return { error: { ...error, message } }; }
+    return { error: null };
   },
 
   logout: async () => { await supabase?.auth.signOut(); clearUserData(); set({ user: null, session: null }); },

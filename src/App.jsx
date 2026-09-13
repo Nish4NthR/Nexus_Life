@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login.jsx';
 import Landing from './pages/Landing.jsx';
 import AuthForm from './pages/AuthForm.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Habits from './pages/Habits.jsx';
 import BadHabits from './pages/BadHabits.jsx';
@@ -20,7 +21,7 @@ export default function App() {
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<AuthForm mode="signup" />} />
     <Route path="/forgot-password" element={<AuthForm mode="forgot" />} />
-    <Route path="/reset-password" element={<AuthForm mode="reset" />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
     <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/habits" element={<Habits />} /><Route path="/bad-habits" element={<BadHabits />} />
